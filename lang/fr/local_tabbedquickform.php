@@ -2,10 +2,10 @@
 
 $string['tabbedquickform:canswitchfeatured'] = 'Peut basculer en version complète';
 
-$string['pluginname'] = 'Formulaires à onglets';
+$string['pluginname'] = 'Formulaires à tabulations';
 $string['enterconfigure'] = 'Configurer le formulaire';
 $string['exitconfigure'] = 'Quitter la configuration';
-$string['filterfeatures'] = 'Accéder au mode simplifié';
+$string['filterfeatures'] = 'Retourner au mode simplifié';
 $string['fullfeatured'] = 'Accéder au mode complet';
 $string['simple'] = 'Simplifié';
 $string['complete'] = 'Complet';

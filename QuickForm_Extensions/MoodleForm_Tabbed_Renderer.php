@@ -145,42 +145,24 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $this->_form = $form; // memorize it for further reference in element filtering
         $formid = $form->getAttribute('id');
 
-        $alternatemode = optional_param('alternateformmode', '', PARAM_INT);
-        if ($alternatemode == 1) {
+        $fullfeaturing = optional_param('fullfeatured', '', PARAM_INT);
+        if ($fullfeaturing) {
             if ($oldrec = $DB->get_record('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
                 $oldrec->value = 1;
                 $DB->update_record('user_preferences', $oldrec);
             } else {
                 $record = new StdClass;
                 $record->userid = $USER->id;
-                $record->name = 'alternateformmode';
+                $record->name = 'fullfeatured';
                 $record->value = 1;
                 $DB->insert_record('user_preferences', $record);
             }
-        } elseif ($alternatemode === 0) {
-            if ($oldrec = $DB->get_record('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
-                $oldrec->value = 0;
-                $DB->update_record('user_preferences', $oldrec);
-            } else {
-                $record = new StdClass;
-                $record->userid = $USER->id;
-                $record->name = 'alternateformmode';
-                $record->value = 0;
-                $DB->insert_record('user_preferences', $record);
-            }
+        } elseif ($fullfeaturing === 0) {
+            $DB->delete_records('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'));
         }
+        $userpref = $DB->get_field('user_preferences', 'value', array('userid' => $USER->id, 'name' => 'alternateformmode'));
         $config = get_config('local_tabbedquickform');
-        if (!$DB->record_exists('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
-            $this->_userFormUnfiltered = $config->defaultmode;
-        } else {
-            $userpref = $DB->get_field('user_preferences', 'value', array('userid' => $USER->id, 'name' => 'alternateformmode'));
-            if ($config->defaultmode) {
-                $this->_userFormUnfiltered = $userpref;
-            } else {
-                // inverts the user pref meaning.
-                $this->_userFormUnfiltered = ($userpref) ? 0 : 1;
-            }
-        }
+        $this->_userFormUnfiltered = ($userpref) ? !(@$config->defaultmode) : (@$config->defaultmode);
 
         parent::startForm($form);
 
@@ -226,17 +208,17 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
 
-        if (empty($SESSION->adminmaskediting) && $this->has_filters() && has_capability('local/tabbedquickform:canswitchfeatured', context_system::instance())) {
-            if ($this->_userFormUnfiltered == 0) {
+        if (empty($SESSION->adminmaskediting)) {
+            if (!$this->_userFormUnfiltered) {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('fullfeatured', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
+                $link = new moodle_url(me(), array('fullfeatured' => true));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             } else {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('filterfeatures', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
+                $link = new moodle_url(me(), array('fullfeatured' => false));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             }
@@ -300,18 +282,11 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $html = str_replace('{emptylabel}', $emptylabel, $html);
 
         // Deal with feature masking
-        if ($visible = $this->filterFeatures($html, $group, true)) {
+        if ($visible = $this->filterFeatures($html, $group)) {
             // Jump over form action buttons
             if ($group->_name != 'buttonar') {
-                if (!isset($this->_tabs[$this->_currentHeader])) {
-                    $this->_tabs[$this->_currentHeader] = new StdClass;
-                }
                 $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
             }
-        }
-
-        if ($group->_name != 'buttonar') {
-            $this->_tabs[$this->_currentHeader]->hasElements = true;
         }
 
         $this->_templates[$group->getName()] = $html;
@@ -388,10 +363,6 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
 
-        if (!($element->_type == 'submit')) {
-            $this->_tabs[$this->_currentHeader]->hasElements = true;
-        }
-
         // Remove all unprocessed placeholders
         $html = str_replace('{maskbutton}', '', $html);
 
@@ -435,7 +406,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs = $this->_tabStartTemplate;
             $active = true;
             foreach ($this->_tabs as $tab) {
-                if ('stdClass' == get_class($tab)) continue;
+                if ('stdClass' == get_class($tab)) continue; 
                 if (!$tab->hasVisibleElements && empty($SESSION->adminmaskediting)) continue;
                 $tabstr = $this->_tabTemplate;
                 $tabstr = str_replace('{tabid}', 'tab-'.$tab->getName(), $tabstr);
@@ -462,8 +433,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs .= '</script>';
             $this->_html = $tabs.$this->_html;
 
-            $context = context_system::instance();
-            if ((is_siteadmin() || has_capability('local/tabbedquickform:canswitchfeatured', $context)) && $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
+            if (is_siteadmin() && $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
                 $this->_html .= '<div class="quickform-mask-notice fa fa-exclamation-circle">'.get_string('hasmaskeditems', 'local_tabbedquickform').'</div>';
             }
         }
@@ -526,7 +496,6 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
         // Register header in tabs.
         $header->hasVisibleElements = 0;
-        $header->hasElements = 0;
         $this->_tabs[$name] = $header;
     }
 
@@ -539,7 +508,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         return $this->_stopFieldsetElements;
     }
 
-    function filterFeatures(&$html, &$element, $isgroup = false) {
+    function filterFeatures(&$html, &$element) {
         global $SESSION, $OUTPUT, $CFG, $PAGE;
 
         static $config;
@@ -552,7 +521,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $bodyid = str_replace('-', '_', $PAGE->bodyid);
         $maskkey = 'mask_'.$bodyid.'_'.$fitemid;
         if (empty($SESSION->adminmaskediting)) {
-            if (!empty($config->$maskkey) && ($this->_userFormUnfiltered == 0)) {
+            if (!empty($config->$maskkey) && !$this->_userFormUnfiltered) {
                 $this->_hasMaskedElements = true;
                 $html = str_replace('{mask}', 'quickform-mask-hidden', $html);
                 return false;
@@ -566,14 +535,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             if (!in_array(@$element->_attributes['name'], $this->_form->_required)) {
                 $maskedpix = $OUTPUT->pix_url('masked', 'local_tabbedquickform');
                 $unmaskedpix = $OUTPUT->pix_url('unmasked', 'local_tabbedquickform');
-                $groupflag = ($isgroup) ? 'true' : 'false' ;
                 if (empty($config->$maskkey)) {
                     $html = str_replace('{mask}', 'quickform-mask-selectable', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$unmaskedpix.'"></a></div>', $html);
                 } else {
                     $html = str_replace('{mask}', 'quickform-mask-selected', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$maskedpix.'"></a></div>', $html);
                 }
             } else {
@@ -582,14 +550,5 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
         return true;
-    }
-
-    function has_filters() {
-        global $PAGE, $DB;
-
-        $bodyid = str_replace('-', '_', $PAGE->bodyid);
-        $maskkey = 'mask_'.$bodyid.'_%';
-
-        return $DB->record_exists_select('config_plugins', ' plugin = ? AND name LIKE ? ', array('local_tabbedquickform', $maskkey));
     }
 }
