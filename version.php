@@ -23,7 +23,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2016080600;
-$plugin->requires = 2014051200;
+$plugin->requires = 2014110400;
 $plugin->component = 'local_tabbedquickform';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '2.7.0';
+$plugin->release = '2.8.0';
