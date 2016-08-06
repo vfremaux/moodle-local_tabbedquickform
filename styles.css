@@ -1,0 +1,57 @@
+
+.quickform-hidden-tab {
+    visibility:hidden;
+    display:none;
+}
+
+.nav.nav-tabs a[aria-haspopup=true] {
+   display:none;
+}
+
+.configure-actions {
+    text-align:right;
+}
+
+.quickform-mask-selectable {
+    border:1px dashed #e0e0e0;
+    background-color:#fdfdfd;
+    padding:3px;
+}
+
+.quickform-mask-selected {
+    opacity:0.4;
+    -moz-opacity:0.4;
+    background-color:#fbfbfb;
+    padding:3px;
+}
+
+.quickform-mask-button {
+    float:right;
+    width:50px;
+    padding:10px;
+}
+
+.quickform-mask-hidden {
+    display:none;
+}
+
+.quickform-mask-notice {
+    font-size:small;
+    color:#c00000;
+}
+
+.quickform-mask-notice.fa.fa-exclamation-circle::before {
+  padding-right: 10px;
+}
+
+.quickform-configure-off {
+    background-color:#00A000 !important;
+    background-image:none !important;
+    color:white !important;
+}
+
+.quickform-configure-on {
+    background-color:#A00000 !important;
+    background-image:none !important;
+    color:white !important;
+}
