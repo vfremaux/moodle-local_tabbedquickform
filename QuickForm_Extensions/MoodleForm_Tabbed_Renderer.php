@@ -377,19 +377,22 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $html = str_replace('{help}', '', $html);
         }
 
-        // Deal with feature masking
-        if ($visible = $this->filterFeatures($html, $element)) {
-            if (!($element->_type == 'submit')) {
-                // echo "Setting $this->_currentHeader to true because of ".$element->getName()."<br>";
-                if (!isset($this->_tabs[$this->_currentHeader])) {
-                    $this->_tabs[$this->_currentHeader] = new StdClass;
+        // Deal with feature masking only if plain elements
+        if (!$this->_inGroup) {
+            if ($visible = $this->filterFeatures($html, $element)) {
+                if (!($element->_type == 'submit')) {
+                    // echo "Setting $this->_currentHeader to true because of ".$element->getName()."<br>";
+                    if (!isset($this->_tabs[$this->_currentHeader])) {
+                        $this->_tabs[$this->_currentHeader] = new StdClass;
+                    }
+                    $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
                 }
-                $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
             }
-        }
-
-        if (!($element->_type == 'submit')) {
-            $this->_tabs[$this->_currentHeader]->hasElements = true;
+    
+            if (!($element->_type == 'submit')) {
+                // echo "Adding ".$element->getName().' to '.$this->_currentHeader.'<br/>';
+                $this->_tabs[$this->_currentHeader]->hasElements = true;
+            }
         }
 
         // Remove all unprocessed placeholders
@@ -435,14 +438,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs = $this->_tabStartTemplate;
             $active = true;
             foreach ($this->_tabs as $tab) {
+
                 if ('stdClass' == get_class($tab)) continue;
-                if (!$tab->hasVisibleElements && empty($SESSION->adminmaskediting)) continue;
+                if (!$tab->hasVisibleElements && $tab->hasElements && empty($SESSION->adminmaskediting)) continue;
                 $tabstr = $this->_tabTemplate;
                 $tabstr = str_replace('{tabid}', 'tab-'.$tab->getName(), $tabstr);
                 $tabstr = str_replace('{tab}', $tab->toHtml(), $tabstr);
                 // Set first tab as active.
                 if ($active) {
-                    $tabstr = str_replace('{active}', 'active', $tabstr);
+                    $tabstr = str_replace('{active}', 'active here', $tabstr);
                     $tabstr = str_replace('{id}', $tab->getAttribute('id'), $tabstr);
                     $active = false;
                 } else {
@@ -456,8 +460,10 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs .= 'function quickform_toggle_fieldset(fid) {
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
                 $(\'.quickform-tab\').removeClass(\'active\');
+                $(\'.quickform-tab\').removeClass(\'here\');
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
+                $(\'#tab-\'+fid).addClass(\'here\');
             }';
             $tabs .= '</script>';
             $this->_html = $tabs.$this->_html;
