@@ -1,7 +1,13 @@
 
-function quickform_toggle_mask(wwwroot, bodyid, fid, themepixmasked, themepixunmasked) {
+function quickform_toggle_mask(wwwroot, bodyid, fid, isgroup, themepixmasked, themepixunmasked) {
 
-    if ($('#fitem_'+fid).hasClass('quickform-mask-selectable')) {
+    if (isgroup) {
+        prefix = 'fgroup';
+    } else {
+        prefix = 'fitem';
+    }
+
+    if ($('#'+prefix+'_'+fid).hasClass('quickform-mask-selectable')) {
         what = 'maskformitem';
     } else {
         what = 'unmaskformitem';
@@ -11,12 +17,12 @@ function quickform_toggle_mask(wwwroot, bodyid, fid, themepixmasked, themepixunm
 
     $.get(url, function(data) {
         if (data == 'masked') {
-            $('#fitem_'+fid).removeClass('quickform-mask-selectable');
-            $('#fitem_'+fid).addClass('quickform-mask-selected');
+            $('#'+prefix+'_'+fid).removeClass('quickform-mask-selectable');
+            $('#'+prefix+'_'+fid).addClass('quickform-mask-selected');
             $('#mask_'+fid).attr('src', themepixmasked);
         } else {
-            $('#fitem_'+fid).removeClass('quickform-mask-selected');
-            $('#fitem_'+fid).addClass('quickform-mask-selectable');
+            $('#'+prefix+'_'+fid).removeClass('quickform-mask-selected');
+            $('#'+prefix+'_'+fid).addClass('quickform-mask-selectable');
             $('#mask_'+fid).attr('src', themepixunmasked);
         }
     }, 'html');

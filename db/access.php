@@ -28,12 +28,13 @@ $capabilities = array(
     'local/tabbedquickform:canswitchfeatured' => array(
 
         'captype' => 'write',
-        'contextlevel' => CONTEXT_BLOCK,
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(
             'manager' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'student' => CAP_ALLOW,
+            'user' => CAP_ALLOW
         )
     ),
 );
