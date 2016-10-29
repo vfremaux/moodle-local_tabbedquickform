@@ -14,23 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version details.
- *
- * @package     local_tabbedquickform
- * @category    local
- * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2016080600;
-$plugin->requires = 2014110400;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '2.8.0';
+require_once($CFG->dirroot.'/lib/formslib.php');
 
-// Non moodle attributes.
-$plugin->codeincrement = '2.8.0000';
+class Mask_Reset_Form extends moodleform {
+
+    function definition() {
+
+        $mform = $this->_form;
+
+        $mform->addElement('text', 'pattern', get_string('deleterange', 'local_tabbedquickform'), '');
+        $mform->setType('pattern', PARAM_TEXT);
+
+        $this->add_action_buttons(true , get_string('confirm'));
+    }
+}
