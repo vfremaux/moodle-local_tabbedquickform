@@ -27,9 +27,9 @@
  * entries in the current view, after a contextual query has been fired to remote connected
  * resource sets.
  *
- * The index will provide a "top viewed" resources side tray, and a "top used" side tray, 
- * that will count local AND remote inttegration of the resource. The remote query to 
- * bound catalogs will also get information about local catalog resource used by remote courses. 
+ * The index will provide a "top viewed" resources side tray, and a "top used" side tray,
+ * that will count local AND remote inttegration of the resource. The remote query to
+ * bound catalogs will also get information about local catalog resource used by remote courses.
  *
  * The index is public access. Browsing the catalog should although be done through a Guest identity,
  * having as a default the repository/sharedresources:view capability.
@@ -50,7 +50,8 @@ require_capability('moodle/site:config', $context);
 $resetstr = get_string('reset', 'local_tabbedquickform');
 
 $PAGE->set_context($context);
-$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey())));
+$navurl = new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey()));
+$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), $navurl);
 $PAGE->navbar->add($resetstr);
 $PAGE->set_title(get_string('pluginname', 'local_tabbedquickform'));
 $PAGE->set_heading($resetstr);
@@ -66,7 +67,7 @@ if ($resetform->is_cancelled()) {
 if ($data = $resetform->get_data()) {
 
     if (empty($data->pattern)) {
-        $likesql = $DB->sql_like('name', ':name'); // LIKE
+        $likesql = $DB->sql_like('name', ':name'); // LIKE.
         $DB->delete_records_select('config_plugins', " plugin = 'local_tabbedquickform' AND $likesql ", array('name' => 'mask_%'));
     } else {
         $likesql = $DB->sql_like_escape('name', ':name');
@@ -79,9 +80,9 @@ if ($data = $resetform->get_data()) {
                 cp.name $likesql
         ";
 
-        $DB->execute($sql, array('name' => $data->pattern);
+        $DB->execute($sql, array('name' => $data->pattern));
 
-        // Invalidate config cache 
+        // Invalidate config cache.
         cache_helper::invalidate_by_definition('core', 'config', array(), 'local_tabbedquickform');
     }
 }

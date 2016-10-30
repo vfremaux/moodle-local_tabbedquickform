@@ -14,10 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-if (!defined('MOODLE_EARLY_INTERNAL')) {
-    defined('MOODLE_INTERNAL') || die();
-}
-
 /**
  * Form for editing HTML block instances.
  *
@@ -27,13 +23,16 @@ if (!defined('MOODLE_EARLY_INTERNAL')) {
  * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+if (!defined('MOODLE_EARLY_INTERNAL')) {
+    defined('MOODLE_INTERNAL') || die();
+}
 
 set_include_path(get_include_path().PATH_SEPARATOR.$CFG->dirroot.'/lib/pear');
-require_once 'HTML/QuickForm.php';
-require_once 'HTML/QuickForm/DHTMLRulesTableless.php';
-require_once 'HTML/QuickForm/Renderer/Tableless.php';
-require_once $CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php';
+require_once('HTML/QuickForm.php');
+require_once('HTML/QuickForm/DHTMLRulesTableless.php');
+require_once('HTML/QuickForm/Renderer/Tableless.php');
+require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
 $config = get_config('local_tabbedquickform');
 if (!empty($config->enable)) {
-    $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Tabbed_Renderer();
+    include($CFG->dirroot.'/local/tabbedquickform/QuickFrom_Extensions/invoke.php');
 }

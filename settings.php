@@ -14,22 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * @package   local_tabbedquickform
  * @category  blocks
  * @author    Valery Fremaux (valery.fremaux@gmail.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 
-// settings default init
+// Settings default init.
 if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code 
+    // Integration driven code.
     require_once($CFG->dirroot.'/local/adminsettings/lib.php');
     list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
 } else {
-    // Standard Moodle code
+    // Standard Moodle code.
     $capability = 'moodle/site:config';
     $hasconfig = $hassiteconfig = has_capability($capability, context_system::instance());
 }
@@ -43,16 +42,19 @@ if ($hassiteconfig) {
         get_string('localtabbedquickformenable', 'local_tabbedquickform'),
         get_string('localtabbedquickformenable_desc', 'local_tabbedquickform'), 0));
 
-    $options = array(0 => get_string('simple', 'local_tabbedquickform'), 1 => get_string('complete', 'local_tabbedquickform'));
-    $settings->add(new admin_setting_configselect('local_tabbedquickform/defaultmode',
-        get_string('localtabbedquickformdefaultmode', 'local_tabbedquickform'),
-        get_string('localtabbedquickformdefaultmode_desc', 'local_tabbedquickform'), 0, $options));
+    $options = array(0 => get_string('simple', 'local_tabbedquickform'),
+                     1 => get_string('complete', 'local_tabbedquickform'));
+    $key = 'local_tabbedquickform/defaultmode';
+    $label = get_string('localtabbedquickformdefaultmode', 'local_tabbedquickform');
+    $desc = get_string('localtabbedquickformdefaultmode_desc', 'local_tabbedquickform');
+    $settings->add(new admin_setting_configselect($key, $label, $desc, 0, $options));
 
     $a = new StdClass;
     $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/export.php';
     $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/import.php';
     $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
-    $settings->add(new admin_setting_heading('h1', 
-        get_string('exportprofiles', 'local_tabbedquickform'),
-        get_string('exportprofiles_desc', 'local_tabbedquickform', $a)));
+
+    $label = get_string('exportprofiles', 'local_tabbedquickform');
+    $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
+    $settings->add(new admin_setting_heading('h1', $label, $desc));
 }
