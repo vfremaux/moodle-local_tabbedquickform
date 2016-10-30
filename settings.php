@@ -33,12 +33,12 @@ if (is_dir($CFG->dirroot.'/local/adminsettings')) {
     $hasconfig = $hassiteconfig = has_capability($capability, context_system::instance());
 }
 
-if ($hassiteconfig) { 
+if ($hassiteconfig) {
     // Needs this condition or there is error on login page.
     $settings = new admin_settingpage('local_tabbedquickform', get_string('pluginname', 'local_tabbedquickform'));
     $ADMIN->add('localplugins', $settings);
 
-    $settings->add(new admin_setting_configcheckbox('local_tabbedquickform/enable', 
+    $settings->add(new admin_setting_configcheckbox('local_tabbedquickform/enable',
         get_string('localtabbedquickformenable', 'local_tabbedquickform'),
         get_string('localtabbedquickformenable_desc', 'local_tabbedquickform'), 0));
 
