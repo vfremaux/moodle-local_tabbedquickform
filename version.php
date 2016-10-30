@@ -17,20 +17,20 @@
 /**
  * Version details.
  *
- * @package    local_tabbedquickform
- * @category   local
- * @author     Valery Fremaux (valery.fremaux@gmail.com)
- * @copyright  2016 onwards Valery Fremaux (valery.fremaux@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2016080600;
-$plugin->requires = 2016051900;
+$plugin->requires = 2014051200;
 $plugin->component = 'local_tabbedquickform';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '3.1.0 (Build 2016080600)';
+$plugin->release = '2.7.0';
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.1.0000';
+$plugin->codeincrement = '2.7.0000';
