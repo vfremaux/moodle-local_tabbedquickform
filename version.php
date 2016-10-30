@@ -15,9 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    local_tabbedquickform
- * @author Valery Fremaux (valery.fremaux@gmail.com)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Version details.
+ *
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -28,5 +32,5 @@ $plugin->component = 'local_tabbedquickform';
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = '3.0.0';
 
-// Non moodle attributes
+// Non moodle attributes.
 $plugin->codeincrement = '3.0.0000';

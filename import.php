@@ -27,9 +27,9 @@
  * entries in the current view, after a contextual query has been fired to remote connected
  * resource sets.
  *
- * The index will provide a "top viewed" resources side tray, and a "top used" side tray, 
- * that will count local AND remote inttegration of the resource. The remote query to 
- * bound catalogs will also get information about local catalog resource used by remote courses. 
+ * The index will provide a "top viewed" resources side tray, and a "top used" side tray,
+ * that will count local AND remote inttegration of the resource. The remote query to
+ * bound catalogs will also get information about local catalog resource used by remote courses.
  *
  * The index is public access. Browsing the catalog should although be done through a Guest identity,
  * having as a default the repository/sharedresources:view capability.
@@ -50,7 +50,8 @@ require_capability('moodle/site:config', $context);
 $importstr = get_string('import', 'local_tabbedquickform');
 
 $PAGE->set_context($context);
-$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey())));
+$navurl = new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey()));
+$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), $navurl);
 $PAGE->navbar->add($importstr);
 $PAGE->set_title(get_string('pluginname', 'local_tabbedquickform'));
 $PAGE->set_heading($importstr);
