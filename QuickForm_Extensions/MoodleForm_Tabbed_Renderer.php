@@ -613,11 +613,11 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $groupflag = ($isgroup) ? 'true' : 'false' ;
                 if (empty($config->$maskkey)) {
                     $html = str_replace('{mask}', 'quickform-mask-selectable', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$unmaskedpix.'"></a></div>', $html);
                 } else {
                     $html = str_replace('{mask}', 'quickform-mask-selected', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$maskedpix.'"></a></div>', $html);
                 }
             } else {

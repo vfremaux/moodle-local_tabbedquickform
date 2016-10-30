@@ -15,8 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package local_tabbedquickform
- * @category local
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * This file provides access to a master shared resources index, intending
  * to allow a public browsing of resources.
@@ -27,9 +29,9 @@
  * entries in the current view, after a contextual query has been fired to remote connected
  * resource sets.
  *
- * The index will provide a "top viewed" resources side tray, and a "top used" side tray, 
- * that will count local AND remote inttegration of the resource. The remote query to 
- * bound catalogs will also get information about local catalog resource used by remote courses. 
+ * The index will provide a "top viewed" resources side tray, and a "top used" side tray,
+ * that will count local AND remote inttegration of the resource. The remote query to
+ * bound catalogs will also get information about local catalog resource used by remote courses.
  *
  * The index is public access. Browsing the catalog should although be done through a Guest identity,
  * having as a default the repository/sharedresources:view capability.
@@ -49,7 +51,8 @@ require_capability('moodle/site:config', $context);
 $exportstr = get_string('export', 'local_tabbedquickform');
 
 $PAGE->set_context($context);
-$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey())));
+$navurl = new moodle_url('/admin/settings.php', array('section' => 'local_tabbedquickform', 'sesskey' => sesskey()));
+$PAGE->navbar->add(get_string('pluginname', 'local_tabbedquickform'), $navurl);
 $PAGE->navbar->add($exportstr);
 $PAGE->set_title(get_string('pluginname', 'local_tabbedquickform'));
 $PAGE->set_heading($exportstr);
