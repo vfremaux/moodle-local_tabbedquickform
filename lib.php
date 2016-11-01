@@ -34,5 +34,5 @@ require_once('HTML/QuickForm/Renderer/Tableless.php');
 require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
 $config = get_config('local_tabbedquickform');
 if (!empty($config->enable)) {
-    include($CFG->dirroot.'/local/tabbedquickform/QuickFrom_Extensions/invoke.php');
+    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
 }
