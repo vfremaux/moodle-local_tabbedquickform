@@ -25,6 +25,8 @@ defined('MOODLE_INTERNAL') || die();
 $string['tabbedquickform:canswitchfeatured'] = 'Can switch full and filtered features';
 
 $string['pluginname'] = 'Tabbed QuickForms';
+$string['allowmaskingmandatories'] = 'Allow masking mandatory fields';
+$string['allowmaskingmandatories_desc'] = 'If enabled, the administrators can mask including mandatory fields. A default value should be available for those fields.';
 $string['enterconfigure'] = 'Enter form tuning';
 $string['exitconfigure'] = 'Exit form tuning';
 $string['filterfeatures'] = 'Enter simple mode';
@@ -43,4 +45,6 @@ $string['masksinsite'] = 'This site has {$a} masks defined.';
 $string['reset'] = 'Masks reset';
 $string['import'] = 'Masks import';
 $string['export'] = 'Masks export';
+$string['excludepagetypes'] = 'Exclude page types';
+$string['excludepagetypes_desc'] = 'Enter a list of page types that will play the traditional vertical layout of the form.';
 $string['deleterange'] = 'Selector pattern (LIKE)';
