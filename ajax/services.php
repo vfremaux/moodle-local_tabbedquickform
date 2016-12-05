@@ -32,12 +32,14 @@ $action = optional_param('what', '', PARAM_TEXT);
 if ($action == 'maskformitem') {
     $elementid = required_param('fitemid', PARAM_TEXT);
     $bodyid = required_param('bodyid', PARAM_TEXT);
+    $value = optional_param('value', '%UNSET%', PARAM_TEXT);
     $bodyid = str_replace('-', '_', $bodyid);
     $maskkey = 'mask_'.$bodyid.'_'.$elementid;
-    set_config($maskkey, 1, 'local_tabbedquickform');
+    set_config($maskkey, $value, 'local_tabbedquickform');
     echo 'masked';
 }
 if ($action == 'unmaskformitem') {
+    // If unmasked, remove entirely the mask definition from config.
     $elementid = required_param('fitemid', PARAM_TEXT);
     $bodyid = required_param('bodyid', PARAM_TEXT);
     $bodyid = str_replace('-', '_', $bodyid);
