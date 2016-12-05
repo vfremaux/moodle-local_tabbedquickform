@@ -1,5 +1,5 @@
 /**
- * Quicform js helpers.
+ * Quickform js helpers.
  */
 // jshint unused:false, undef:false
 
@@ -17,7 +17,26 @@ function quickform_toggle_mask(bodyid, fid, isgroup, themepixmasked, themepixunm
         what = 'unmaskformitem';
     }
 
+    var elm = $('#' + fid);
+    if (elm.is('input')) {
+        if (elm.attr('type') === 'checkbox') {
+            var value = elm.is(':checked') ? 1 : 0;
+        } else {
+            var value = elm.val();
+        }
+        elm.css('background-color', '#CCFABE');
+    } else if (elm.is('select')) {
+        var value = elm.val();
+        elm.css('background-color', '#CCFABE');
+    } else if (elm.is('textarea')) {
+        var value = elm.val();
+        elm.css('background-color', '#CCFABE');
+    } else {
+        value = '%UNSET%';
+    }
+
     url = M.cfg.wwwroot + '/local/tabbedquickform/ajax/services.php?what=' + what + '&bodyid=' + bodyid + '&fitemid=' + fid;
+    url += '&value=' + value;
 
     $.get(url, function(data) {
         if (data === 'masked') {

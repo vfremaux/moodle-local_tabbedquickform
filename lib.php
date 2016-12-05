@@ -33,6 +33,11 @@ require_once('HTML/QuickForm/DHTMLRulesTableless.php');
 require_once('HTML/QuickForm/Renderer/Tableless.php');
 require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
 $config = get_config('local_tabbedquickform');
-if (!empty($config->enable)) {
+$excluded = false;
+global $PAGE;
+if ($exclusions = explode("\n", @$config->excludepagetypes)) {
+    $excluded = in_array($PAGE->bodyid, $exclusions);
+}
+if (!empty($config->enable) && !$excluded) {
     include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
 }
