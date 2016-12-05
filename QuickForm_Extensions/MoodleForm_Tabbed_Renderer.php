@@ -427,7 +427,10 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $bodyid = str_replace('-', '_', $PAGE->bodyid);
         $maskkey = 'mask_'.$bodyid.'_'.$fitemid;
         $config = get_config('local_tabbedquickform');
-        if (isset($config->$maskkey) && ($config->$maskkey != '%UNSET%')) {
+        if (isset($config->$maskkey) &&
+                ($config->$maskkey != '%UNSET%') &&
+                        ($this->_userFormUnfiltered == 0)) {
+            // If we have an explicit setable value, have a mask and are in simple mode, then apply.
             $element->setValue($config->$maskkey);
         }
 
