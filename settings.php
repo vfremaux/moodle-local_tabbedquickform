@@ -38,23 +38,33 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_tabbedquickform', get_string('pluginname', 'local_tabbedquickform'));
     $ADMIN->add('localplugins', $settings);
 
-    $settings->add(new admin_setting_configcheckbox('local_tabbedquickform/enable',
-        get_string('localtabbedquickformenable', 'local_tabbedquickform'),
-        get_string('localtabbedquickformenable_desc', 'local_tabbedquickform'), 0));
+    $key = 'local_tabbedquickform/enable';
+    $label = get_string('localtabbedquickformenable', 'local_tabbedquickform');
+    $desc = get_string('localtabbedquickformenable_desc', 'local_tabbedquickform');
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, 0));
 
-    $options = array(0 => get_string('simple', 'local_tabbedquickform'),
-                     1 => get_string('complete', 'local_tabbedquickform'));
+    $key = 'local_tabbedquickform/allowmaskingmandatories';
+    $label = get_string('allowmaskingmandatories', 'local_tabbedquickform');
+    $desc = get_string('allowmaskingmandatories_desc', 'local_tabbedquickform');
+    $settings->add(new admin_setting_configcheckbox($key, $label, $desc, 0));
+
+    $options = array(0 => get_string('simple', 'local_tabbedquickform'), 1 => get_string('complete', 'local_tabbedquickform'));
     $key = 'local_tabbedquickform/defaultmode';
     $label = get_string('localtabbedquickformdefaultmode', 'local_tabbedquickform');
     $desc = get_string('localtabbedquickformdefaultmode_desc', 'local_tabbedquickform');
     $settings->add(new admin_setting_configselect($key, $label, $desc, 0, $options));
 
+    $key = 'local_tabbedquickform/excludepagetypes';
+    $label = get_string('excludepagetypes', 'local_tabbedquickform');
+    $desc = get_string('excludepagetypes_desc', 'local_tabbedquickform');
+    $defaults = 'page-mod-tracker-reportissue';
+    $settings->add(new admin_setting_configtextarea($key, $label, $desc, $defaults));
+
     $a = new StdClass;
     $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/export.php';
     $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/import.php';
     $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
-
-    $label = get_string('exportprofiles', 'local_tabbedquickform');
-    $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
-    $settings->add(new admin_setting_heading('h1', $label, $desc));
+    $settings->add(new admin_setting_heading('h1', 
+        get_string('exportprofiles', 'local_tabbedquickform'),
+        get_string('exportprofiles_desc', 'local_tabbedquickform', $a)));
 }
