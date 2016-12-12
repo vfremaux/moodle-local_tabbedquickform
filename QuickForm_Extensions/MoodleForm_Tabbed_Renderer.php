@@ -496,7 +496,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $tabs .= $tabstr;
 
                 if (!$tab->hasAdvancedVisibleElements) {
-                    $postformjquery .= '$(\'#'.$tab->getAttribute('id').' .fitem.moreless-actions\').toggleClass(\'quickform-mask-hidden\');'."\n";
+                    $postformjquery .= 'quickform_toggle_hidden(\''.$tab->getAttribute('id').'\')'."\n";
                 }
             }
             $tabs .= $this->_tabEndTemplate;
@@ -508,7 +508,10 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
                 $(\'#tab-\'+fid).addClass(\'here\');
-            }';
+            }'."\n";
+            $tabs .= 'function quickform_toggle_hidden(elmid) {
+        $(\'#\' + elmid + \' .fitem.moreless-actions\').toggleClass(\'quickform-mask-hidden\');
+}';
             $tabs .= '</script>';
 
             $postform= '';
