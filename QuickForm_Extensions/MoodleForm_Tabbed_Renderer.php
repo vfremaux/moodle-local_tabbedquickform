@@ -496,28 +496,37 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $tabs .= $tabstr;
 
                 if (!$tab->hasAdvancedVisibleElements) {
-                    $postformjquery .= 'quickform_toggle_hidden(\''.$tab->getAttribute('id').'\')'."\n";
+                    $postformjquery .= 'quickform_toggle_hidden(\''.$tab->getAttribute('id').'\');'."\n";
                 }
             }
             $tabs .= $this->_tabEndTemplate;
             $tabs .= '<script type="text/javascript">';
-            $tabs .= 'function quickform_toggle_fieldset(fid) {
+            $tabs .= 'function quickform_toggle_fieldset(fid, nofire) {
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
                 $(\'#tab-\'+fid).addClass(\'here\');
+                // Just fire field choice to keep it in session for further reloads.
+                if (nofire == undefined) {
+                    url = M.cfg.wwwroot + \'/local/tabbedquickform/ajax/services.php?what=keepfield&fid=\' + fid;
+                    $.get(url, function(data){} );
+                }
             }'."\n";
             $tabs .= 'function quickform_toggle_hidden(elmid) {
         $(\'#\' + elmid + \' .fitem.moreless-actions\').toggleClass(\'quickform-mask-hidden\');
 }';
             $tabs .= '</script>';
 
-            $postform= '';
+            $postform = '';
             if (!empty($postformjquery)) {
                 $postform = '<script type="text/javascript">';
                 $postform .= $postformjquery;
+                if (!empty($SESSION->formactivefield)) {
+                    // If some field is stored in session try active it.
+                    $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
+                }
                 $postform .= '</script>';
             }
 
