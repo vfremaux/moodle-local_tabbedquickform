@@ -23,27 +23,31 @@
 require('../../../config.php');
 
 require_login();
-if (!is_siteadmin()) {
-    exit;
-}
+
 
 $action = optional_param('what', '', PARAM_TEXT);
 
-if ($action == 'maskformitem') {
-    $elementid = required_param('fitemid', PARAM_TEXT);
-    $bodyid = required_param('bodyid', PARAM_TEXT);
-    $value = optional_param('value', '%UNSET%', PARAM_TEXT);
-    $bodyid = str_replace('-', '_', $bodyid);
-    $maskkey = 'mask_'.$bodyid.'_'.$elementid;
-    set_config($maskkey, $value, 'local_tabbedquickform');
-    echo 'masked';
+if (is_siteadmin()) {
+    if ($action == 'maskformitem') {
+        $elementid = required_param('fitemid', PARAM_TEXT);
+        $bodyid = required_param('bodyid', PARAM_TEXT);
+        $value = optional_param('value', '%UNSET%', PARAM_TEXT);
+        $bodyid = str_replace('-', '_', $bodyid);
+        $maskkey = 'mask_'.$bodyid.'_'.$elementid;
+        set_config($maskkey, $value, 'local_tabbedquickform');
+        echo 'masked';
+    }
+    if ($action == 'unmaskformitem') {
+        // If unmasked, remove entirely the mask definition from config.
+        $elementid = required_param('fitemid', PARAM_TEXT);
+        $bodyid = required_param('bodyid', PARAM_TEXT);
+        $bodyid = str_replace('-', '_', $bodyid);
+        $maskkey = 'mask_'.$bodyid.'_'.$elementid;
+        set_config($maskkey, null, 'local_tabbedquickform');
+        echo 'unmasked';
+    }
 }
-if ($action == 'unmaskformitem') {
-    // If unmasked, remove entirely the mask definition from config.
-    $elementid = required_param('fitemid', PARAM_TEXT);
-    $bodyid = required_param('bodyid', PARAM_TEXT);
-    $bodyid = str_replace('-', '_', $bodyid);
-    $maskkey = 'mask_'.$bodyid.'_'.$elementid;
-    set_config($maskkey, null, 'local_tabbedquickform');
-    echo 'unmasked';
+if ($action == 'keepfield') {
+    $fid = required_param('fid', PARAM_TEXT);
+    $SESSION->formactivefield = $fid;
 }
