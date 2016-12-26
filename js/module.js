@@ -1,7 +1,7 @@
 /**
  * Quickform js helpers.
  */
-// jshint unused:false, undef:false
+// jshint undef:false, unused:false
 
 function quickform_toggle_mask(bodyid, fid, isgroup, themepixmasked, themepixunmasked) {
 
@@ -32,7 +32,7 @@ function quickform_toggle_mask(bodyid, fid, isgroup, themepixmasked, themepixunm
         var value = elm.val();
         elm.css('background-color', '#CCFABE');
     } else {
-        value = '%UNSET%';
+        var value = '%UNSET%';
     }
 
     url = M.cfg.wwwroot + '/local/tabbedquickform/ajax/services.php?what=' + what + '&bodyid=' + bodyid + '&fitemid=' + fid;
