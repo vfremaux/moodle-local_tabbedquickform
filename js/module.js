@@ -5,6 +5,8 @@
 
 function quickform_toggle_mask(bodyid, fid, isgroup, themepixmasked, themepixunmasked) {
 
+    var value;
+
     if (isgroup) {
         prefix = 'fgroup';
     } else {
@@ -20,19 +22,19 @@ function quickform_toggle_mask(bodyid, fid, isgroup, themepixmasked, themepixunm
     var elm = $('#' + fid);
     if (elm.is('input')) {
         if (elm.attr('type') === 'checkbox') {
-            var value = elm.is(':checked') ? 1 : 0;
+            value = elm.is(':checked') ? 1 : 0;
         } else {
-            var value = elm.val();
+            value = elm.val();
         }
         elm.css('background-color', '#CCFABE');
     } else if (elm.is('select')) {
-        var value = elm.val();
+        value = elm.val();
         elm.css('background-color', '#CCFABE');
     } else if (elm.is('textarea')) {
-        var value = elm.val();
+        value = elm.val();
         elm.css('background-color', '#CCFABE');
     } else {
-        var value = '%UNSET%';
+        value = '%UNSET%';
     }
 
     url = M.cfg.wwwroot + '/local/tabbedquickform/ajax/services.php?what=' + what + '&bodyid=' + bodyid + '&fitemid=' + fid;

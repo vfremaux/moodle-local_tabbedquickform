@@ -464,7 +464,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
 
         // finally add tabs to the top
-        if (!empty($this->_tabs)) {
+        if (!empty($this->_tabs) && (count($this->_tabs) > 1)) {
             $tabs = $this->_tabStartTemplate;
             $active = true;
             $postformjquery = '';
