@@ -34,10 +34,10 @@
  * The index is public access. Browsing the catalog should although be done through a Guest identity,
  * having as a default the repository/sharedresources:view capability.
  */
-require('../../config.php');
-require_once($CFG->dirroot.'/local/tabbedquickform/import_form.php');
+require('../../../config.php');
+require_once($CFG->dirroot.'/local/tabbedquickform/pro/import_form.php');
 
-$url = new moodle_url('/local/tabbedquickform/import.php');
+$url = new moodle_url('/local/tabbedquickform/pro/import.php');
 
 // Security.
 

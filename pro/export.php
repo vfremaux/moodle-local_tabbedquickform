@@ -36,9 +36,9 @@
  * The index is public access. Browsing the catalog should although be done through a Guest identity,
  * having as a default the repository/sharedresources:view capability.
  */
-require('../../config.php');
+require('../../../config.php');
 
-$url = new moodle_url('/local/tabbedquickform/export.php');
+$url = new moodle_url('/local/tabbedquickform/pro/export.php');
 
 // Security.
 
