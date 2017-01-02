@@ -77,11 +77,10 @@ function form_init_date_js() {
     global $PAGE;
     static $done = false;
     if (!$done) {
-        $calendar = \core_calendar\type_factory::get_calendar_instance();
         $module   = 'moodle-form-dateselector';
         $function = 'M.form.dateselector.init_date_selectors';
         $config = array(array(
-            'firstdayofweek'    => $calendar->get_starting_weekday(),
+            'firstdayofweek'    => get_string('firstdayofweek', 'langconfig'),
             'mon'               => date_format_string(strtotime("Monday"), '%a', 99),
             'tue'               => date_format_string(strtotime("Tuesday"), '%a', 99),
             'wed'               => date_format_string(strtotime("Wednesday"), '%a', 99),
@@ -2143,7 +2142,7 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
 
 var skipClientValidation = false;
 
-function qf_errorHandler(element, _qfMsg, escapedName) {
+function qf_errorHandler(element, _qfMsg) {
   div = element.parentNode;
 
   if ((div == undefined) || (element.name == undefined)) {
@@ -2152,10 +2151,10 @@ function qf_errorHandler(element, _qfMsg, escapedName) {
   }
 
   if (_qfMsg != \'\') {
-    var errorSpan = document.getElementById(\'id_error_\' + escapedName);
+    var errorSpan = document.getElementById(\'id_error_\'+element.name);
     if (!errorSpan) {
       errorSpan = document.createElement("span");
-      errorSpan.id = \'id_error_\' + escapedName;
+      errorSpan.id = \'id_error_\'+element.name;
       errorSpan.className = "error";
       element.parentNode.insertBefore(errorSpan, element.parentNode.firstChild);
       document.getElementById(errorSpan.id).setAttribute(\'TabIndex\', \'0\');
@@ -2173,17 +2172,17 @@ function qf_errorHandler(element, _qfMsg, escapedName) {
         div.className += " error";
         linebreak = document.createElement("br");
         linebreak.className = "error";
-        linebreak.id = \'id_error_break_\' + escapedName;
+        linebreak.id = \'id_error_break_\'+element.name;
         errorSpan.parentNode.insertBefore(linebreak, errorSpan.nextSibling);
     }
 
     return false;
   } else {
-    var errorSpan = document.getElementById(\'id_error_\' + escapedName);
+    var errorSpan = document.getElementById(\'id_error_\'+element.name);
     if (errorSpan) {
       errorSpan.parentNode.removeChild(errorSpan);
     }
-    var linebreak = document.getElementById(\'id_error_break_\' + escapedName);
+    var linebreak = document.getElementById(\'id_error_break_\'+element.name);
     if (linebreak) {
       linebreak.parentNode.removeChild(linebreak);
     }
@@ -2208,7 +2207,7 @@ function qf_errorHandler(element, _qfMsg, escapedName) {
                 create_function('$matches', 'return sprintf("_%2x",ord($matches[0]));'),
                 $elementName);
             $js .= '
-function validate_' . $this->_formName . '_' . $escapedElementName . '(element, escapedName) {
+function validate_' . $this->_formName . '_' . $escapedElementName . '(element) {
   if (undefined == element) {
      //required element was not found, then let form be submitted without client side validation
      return true;
@@ -2223,7 +2222,7 @@ function validate_' . $this->_formName . '_' . $escapedElementName . '(element, 
         frm = frm.parentNode;
       }
     ' . join("\n", $jsArr) . '
-      return qf_errorHandler(element, _qfMsg, escapedName);
+      return qf_errorHandler(element, _qfMsg);
   } else {
     //element name should be defined else error msg will not be displayed.
     return true;
@@ -2231,13 +2230,13 @@ function validate_' . $this->_formName . '_' . $escapedElementName . '(element, 
 }
 ';
             $validateJS .= '
-  ret = validate_' . $this->_formName . '_' . $escapedElementName.'(frm.elements[\''.$elementName.'\'], \''.$escapedElementName.'\') && ret;
+  ret = validate_' . $this->_formName . '_' . $escapedElementName.'(frm.elements[\''.$elementName.'\']) && ret;
   if (!ret && !first_focus) {
     first_focus = true;
     Y.use(\'moodle-core-event\', function() {
-        Y.Global.fire(M.core.globalEvents.FORM_ERROR, {formid: \'' . $this->_attributes['id'] . '\',
-                                                       elementid: \'id_error_' . $escapedElementName . '\'});
-        document.getElementById(\'id_error_' . $escapedElementName . '\').focus();
+        Y.Global.fire(M.core.globalEvents.FORM_ERROR, {formid: \''. $this->_attributes['id'] .'\',
+                                                       elementid: \'id_error_'.$elementName.'\'});
+        document.getElementById(\'id_error_'.$elementName.'\').focus();
     });
   }
 ';
@@ -2246,7 +2245,7 @@ function validate_' . $this->_formName . '_' . $escapedElementName . '(element, 
             //unset($element);
             //$element =& $this->getElement($elementName);
             //end of fix
-            $valFunc = 'validate_' . $this->_formName . '_' . $escapedElementName . '(this, \''.$escapedElementName.'\')';
+            $valFunc = 'validate_' . $this->_formName . '_' . $escapedElementName . '(this)';
             $onBlur = $element->getAttribute('onBlur');
             $onChange = $element->getAttribute('onChange');
             $element->updateAttributes(array('onBlur' => $onBlur . $valFunc,
@@ -2598,13 +2597,13 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         // switch next two lines for ol li containers for form items.
         //        $this->_elementTemplates=array('default'=>"\n\t\t".'<li class="fitem"><label>{label}{help}<!-- BEGIN required -->{req}<!-- END required --></label><div class="qfelement<!-- BEGIN error --> error<!-- END error --> {type}"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></li>');
         $this->_elementTemplates = array(
-        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error" tabindex="0">{error}</span><br /><!-- END error -->{element}</div></div>',
+        'default'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}" {aria-live}><div class="fitemtitle"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div><div class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
 
         'actionbuttons'=>"\n\t\t".'<div id="{id}" class="fitem fitem_actionbuttons fitem_{type}"><div class="felement {type}">{element}</div></div>',
 
-        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error" tabindex="0">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
+        'fieldset'=>"\n\t\t".'<div id="{id}" class="fitem {advanced}<!-- BEGIN required --> required<!-- END required --> fitem_{type} {emptylabel}"><div class="fitemtitle"><div class="fgrouplabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div></div><fieldset class="felement {type}<!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</fieldset></div>',
 
-        'static'=>"\n\t\t".'<div class="fitem {advanced} {emptylabel}"><div class="fitemtitle"><div class="fstaticlabel">{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} {help}</div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error" tabindex="0">{error}</span><br /><!-- END error -->{element}</div></div>',
+        'static'=>"\n\t\t".'<div class="fitem {advanced} {emptylabel}"><div class="fitemtitle"><div class="fstaticlabel"><label>{label}<!-- BEGIN required -->{req}<!-- END required -->{advancedimg} </label>{help}</div></div><div class="felement fstatic <!-- BEGIN error --> error<!-- END error -->"><!-- BEGIN error --><span class="error">{error}</span><br /><!-- END error -->{element}</div></div>',
 
         'warning'=>"\n\t\t".'<div class="fitem {advanced} {emptylabel}">{element}</div>',
 
@@ -2929,6 +2928,18 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
  * @name $_HTML_QuickForm_default_renderer
  */
 $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Renderer();
+// PATCH : Overloads quickform renderer
+require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
+$config = get_config('local_tabbedquickform');
+$excluded = false;
+global $PAGE;
+if ($exclusions = explode("\n", @$config->excludepagetypes)) {
+    $excluded = in_array($PAGE->bodyid, $exclusions);
+}
+if (!empty($config->enable) && !$excluded) {
+    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
+}
+// /PATCH
 
 /** Please keep this list in alphabetical order. */
 MoodleQuickForm::registerElementType('advcheckbox', "$CFG->libdir/form/advcheckbox.php", 'MoodleQuickForm_advcheckbox');
