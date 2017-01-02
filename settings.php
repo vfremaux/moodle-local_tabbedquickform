@@ -22,6 +22,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot.'/local/tabbedquickform/locallib.php');
+
 // Settings default init.
 if (is_dir($CFG->dirroot.'/local/adminsettings')) {
     // Integration driven code.
@@ -60,11 +62,19 @@ if ($hassiteconfig) {
     $defaults = 'page-mod-tracker-reportissue';
     $settings->add(new admin_setting_configtextarea($key, $label, $desc, $defaults));
 
-    $a = new StdClass;
-    $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/export.php';
-    $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/import.php';
-    $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
-    $label = get_string('exportprofiles', 'local_tabbedquickform');
-    $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
-    $settings->add(new admin_setting_heading('h1', $label, $desc));
+    if (local_tabbedquickform_supports_feature('export/export')) {
+        $a = new StdClass;
+        $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/pro/export.php';
+        $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/pro/import.php';
+        $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
+        $label = get_string('exportprofilespro', 'local_tabbedquickform');
+        $desc = get_string('exportprofilespro_desc', 'local_tabbedquickform', $a);
+        $settings->add(new admin_setting_heading('h1', $label, $desc));
+    } else {
+        $a = new StdClass;
+        $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
+        $label = get_string('exportprofiles', 'local_tabbedquickform');
+        $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
+        $settings->add(new admin_setting_heading('h1', $label, $desc));
+    }
 }
