@@ -41,6 +41,7 @@ $string['localtabbedquickformdefaultmode_desc'] = 'Sets the default forms state 
 $string['exportprofilespro'] = 'Exchange profiles';
 $string['exportprofilespro_desc'] = 'You may <a href="{$a->exporturl}">export</a> and <a href="{$a->importurl}">import</a> mask key definitions as simple list of mask keys. You may also want to globally <a href="{$a->reseturl}">reset</a> all form masks that you have setup.';
 $string['resetprofiles'] = 'Reset tuning profile';
+$string['exportprofiles'] = 'Reset profiles';
 $string['exportprofiles_desc'] = 'You may want to globally <a href="{$a->reseturl}">reset</a> all form masks that you have setup.';
 $string['maskkeys'] = 'Mask keys (one per line)';
 $string['masksinsite'] = 'This site has {$a} masks defined.';

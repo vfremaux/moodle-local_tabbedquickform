@@ -506,7 +506,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
                 if (!$(\'#\'+fid).length) {
-                    fid = $(\'.quickform-tab:first\').attr(\'id\');
+                    fid = $(\'.quickform-tab:first\').attr(\'id\').replace(\'tab-\', \'id_\');
                 }
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
