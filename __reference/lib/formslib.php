@@ -188,6 +188,10 @@ abstract class moodleform {
             $this->_form->hardFreeze();
         }
 
+        // HACK to prevent browsers from automatically inserting the user's password into the wrong fields.
+        $element = $this->_form->addElement('hidden');
+        $element->setType('password');
+
         $this->definition();
 
         $this->_form->addElement('hidden', 'sesskey', null); // automatic sesskey protection
@@ -2229,7 +2233,11 @@ function validate_' . $this->_formName . '_' . $escapedElementName . '(element) 
   ret = validate_' . $this->_formName . '_' . $escapedElementName.'(frm.elements[\''.$elementName.'\']) && ret;
   if (!ret && !first_focus) {
     first_focus = true;
-    document.getElementById(\'id_error_'.$elementName.'\').focus();
+    Y.use(\'moodle-core-event\', function() {
+        Y.Global.fire(M.core.globalEvents.FORM_ERROR, {formid: \''. $this->_attributes['id'] .'\',
+                                                       elementid: \'id_error_'.$elementName.'\'});
+        document.getElementById(\'id_error_'.$elementName.'\').focus();
+    });
   }
 ';
 
@@ -2905,7 +2913,7 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
         global $CFG;
         if (!empty($CFG->strictformsrequired)) {
             if (!empty($format) && $format == FORMAT_HTML) {
-                return array('', "{jsVar}.replace(/(<[^img|hr|canvas]+>)|&nbsp;|\s+/ig, '') == ''");
+                return array('', "{jsVar}.replace(/(<(?!img|hr|canvas)[^>]*>)|&nbsp;|\s+/ig, '') == ''");
             } else {
                 return array('', "{jsVar}.replace(/^\s+$/g, '') == ''");
             }
@@ -2920,6 +2928,18 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
  * @name $_HTML_QuickForm_default_renderer
  */
 $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Renderer();
+// PATCH : Overloads quickform renderer
+require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
+$config = get_config('local_tabbedquickform');
+$excluded = false;
+global $PAGE;
+if ($exclusions = explode("\n", @$config->excludepagetypes)) {
+    $excluded = in_array($PAGE->bodyid, $exclusions);
+}
+if (!empty($config->enable) && !$excluded) {
+    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
+}
+// /PATCH
 
 /** Please keep this list in alphabetical order. */
 MoodleQuickForm::registerElementType('advcheckbox', "$CFG->libdir/form/advcheckbox.php", 'MoodleQuickForm_advcheckbox');
