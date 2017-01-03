@@ -2928,18 +2928,6 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
  * @name $_HTML_QuickForm_default_renderer
  */
 $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Renderer();
-// PATCH : Overloads quickform renderer
-require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
-$config = get_config('local_tabbedquickform');
-$excluded = false;
-global $PAGE;
-if ($exclusions = explode("\n", @$config->excludepagetypes)) {
-    $excluded = in_array($PAGE->bodyid, $exclusions);
-}
-if (!empty($config->enable) && !$excluded) {
-    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
-}
-// /PATCH
 
 /** Please keep this list in alphabetical order. */
 MoodleQuickForm::registerElementType('advcheckbox', "$CFG->libdir/form/advcheckbox.php", 'MoodleQuickForm_advcheckbox');
