@@ -15,23 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Form for editing HTML block instances.
  *
  * @package     local_tabbedquickform
  * @category    local
  * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
+ * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2017012500;
-$plugin->requires = 2016051900;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.1.0 (Build 2017012500)';
+/**
+ * We must capture the old block_vmoodle table records and remove the old table
+ *
+ */
+function xmldb_local_tabbedquickform_install() {
+    global $CFG;
 
-// Non moodle attributes.
-$plugin->codeincrement = '3.1.0002';
-$plugin->privacy = 'dualrelease';
+    // Register some config keys so we avoid to have them explicitely in config.php
+    if (empty($CFG->moodlepageclassfile)) {
+        set_config('moodlepageclassfile', $CFG->dirroot.'/local/tabbedquickform/classes/jquery_forced_moodle_page.class.php');
+        set_config('moodlepageclass', 'jquery_forced_moodle_page');
+    }
+}
