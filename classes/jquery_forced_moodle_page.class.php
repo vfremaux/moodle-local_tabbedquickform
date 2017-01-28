@@ -25,11 +25,19 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * This is not the real use of this core hook, but ensures JQuery will be available everywhere
- * in moodle.
- */
-function local_tabbedquickform_extend_navigation() {
-    global $PAGE;
+require_once($CFG->dirroot.'/lib/pagelib.php');
 
+class jquery_forced_moodle_page extends moodle_page {
+
+    /**
+     * We are sure this function is called before any output is done.
+     * So we can force jquery loading here.
+     */
+    public function ensure_theme_not_set() {
+        global $PAGE;
+
+        $PAGE->requires->jquery();
+
+        return parent::ensure_theme_not_set();
+    }
 }
