@@ -1,0 +1,8 @@
+{
+    "moodle-local_tabbedquickform-tabbedformerrors": {
+        "requires": [
+            "base-base",
+            "io-base"
+        ]
+    }
+}

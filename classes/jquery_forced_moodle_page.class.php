@@ -15,23 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Form for editing HTML block instances.
  *
  * @package     local_tabbedquickform
  * @category    local
  * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
+ * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2017012500;
-$plugin->requires = 2016051900;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.1.0 (Build 2017012500)';
+require_once($CFG->dirroot.'/lib/pagelib.php');
 
-// Non moodle attributes.
-$plugin->codeincrement = '3.1.0002';
-$plugin->privacy = 'dualrelease';
+class jquery_forced_moodle_page extends moodle_page {
+
+    /**
+     * We are sure this function is called before any output is done.
+     * So we can force jquery loading here.
+     */
+    public function ensure_theme_not_set() {
+        global $PAGE;
+
+        $PAGE->requires->jquery();
+
+        return parent::ensure_theme_not_set();
+    }
+}

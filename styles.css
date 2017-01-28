@@ -55,3 +55,14 @@
     background-image:none !important;
     color:white !important;
 }
+
+.tabbedform-error {
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+    background-color: #f2dede;
+    background-image:none;
+    color:#b94a48;
+}
+.tabbedform-error a {
+    color:#b94a48;
+}
