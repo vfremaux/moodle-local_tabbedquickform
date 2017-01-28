@@ -23,21 +23,13 @@
  * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-if (!defined('MOODLE_EARLY_INTERNAL')) {
-    defined('MOODLE_INTERNAL') || die();
-}
+defined('MOODLE_INTERNAL') || die();
 
-set_include_path(get_include_path().PATH_SEPARATOR.$CFG->dirroot.'/lib/pear');
-require_once('HTML/QuickForm.php');
-require_once('HTML/QuickForm/DHTMLRulesTableless.php');
-require_once('HTML/QuickForm/Renderer/Tableless.php');
-require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
-$config = get_config('local_tabbedquickform');
-$excluded = false;
-global $PAGE;
-if ($exclusions = explode("\n", @$config->excludepagetypes)) {
-    $excluded = in_array($PAGE->bodyid, $exclusions);
-}
-if (!empty($config->enable) && !$excluded) {
-    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
+/**
+ * This is not the real use of this core hook, but ensures JQuery will be available everywhere
+ * in moodle.
+ */
+function local_tabbedquickform_extend_navigation() {
+    global $PAGE;
+
 }
