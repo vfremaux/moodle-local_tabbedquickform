@@ -42,7 +42,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         "\n\t\t<ul class=\"nav nav-tabs\">";
 
     var $_tabTemplate = 
-        "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active}\"><a href=\"Javascript:quickform_toggle_fieldset('{id}')\">{tab}</a></li>";
+        "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active} {errors} \"><a href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\">{tab}</a></li>";
 
     var $_tabEndTemplate = 
         "\n\t\t</ul>";
@@ -143,7 +143,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $this->_elementTemplates = str_replace('{req}', $this->_reqHTML, $this->_elementTemplates);
         $this->_advancedHTML = $form->getAdvancedHTML();
         $this->_collapseButtons = '';
-        $this->_form = $form; // memorize it for further reference in element filtering
+        $this->_form = $form; // memorize it for further reference in element filtering.
+        $this->_errors = $form->_errors;
         $formid = $form->getAttribute('id');
 
         $alternatemode = optional_param('alternateformmode', '', PARAM_INT);
@@ -158,7 +159,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $record->value = 1;
                 $DB->insert_record('user_preferences', $record);
             }
-        } elseif ($alternatemode === 0) {
+        } else if ($alternatemode === 0) {
             if ($oldrec = $DB->get_record('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
                 $oldrec->value = 0;
                 $DB->update_record('user_preferences', $oldrec);
@@ -186,6 +187,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         parent::startForm($form);
 
         $PAGE->requires->js('/local/tabbedquickform/js/module.js');
+        $PAGE->requires->yui_module('moodle-local_tabbedquickform-tabbedformerrors',
+                                    'Y.M.local_tabbedquickform.tabbedformerrors.init', null, null, true);
 
         if ($form->isFrozen()) {
             $this->_formTemplate = "\n<div class=\"mform frozen\">\n{content}\n</div>";
@@ -322,6 +325,10 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
         $html = str_replace('{mask}', '', $html);
 
+        if (isset($this->_errors[$group->getName()])) {
+            $this->_tabs[$this->_currentHeader]->hasErrors = true;
+        }
+
         $this->_templates[$group->getName()] = $html;
         // Fix for bug in tableless quickforms that didn't allow you to stop a
         // fieldset before a group of elements.
@@ -377,6 +384,10 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         } else {
             $visible = true;
+        }
+
+        if (isset($this->_errors[$element->getName()])) {
+            $this->_tabs[$this->_currentHeader]->hasErrors = true;
         }
 
         if ($visible) {
@@ -463,7 +474,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
 
-        // finally add tabs to the top
+        // Finally add tabs to the top.
         if (!empty($this->_tabs) && (count($this->_tabs) > 1)) {
             $tabs = $this->_tabStartTemplate;
             $active = true;
@@ -488,6 +499,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 } else {
                     $tabstr = str_replace('{active}', '', $tabstr);
                     $tabstr = str_replace('{id}', $tab->getAttribute('id'), $tabstr);
+                }
+                if (@$tab->hasErrors) {
+                    $tabstr = str_replace('{errors}', 'tabbedform-error', $tabstr);
+                    $tabstr = str_replace('{alt}', get_string('sectionhaserrors', 'local_tabbedquickform'), $tabstr);
+                } else {
+                    $tabstr = str_replace('{errors}', '', $tabstr);
+                    $tabstr = str_replace('{alt}', '', $tabstr);
                 }
                 if ($tabname == 'modstandardelshdr') {
                     // Add a convenient tab separator when an activity module.
@@ -536,8 +554,12 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $this->_html = $tabs.$this->_html.$postform;
 
             $context = context_system::instance();
-            if ((is_siteadmin() || has_capability('local/tabbedquickform:canswitchfeatured', $context)) && $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
-                $this->_html .= '<div class="quickform-mask-notice fa fa-exclamation-circle">'.get_string('hasmaskeditems', 'local_tabbedquickform').'</div>';
+            if ((is_siteadmin() ||
+                    has_capability('local/tabbedquickform:canswitchfeatured', $context)) &&
+                            $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
+                $this->_html .= '<div class="quickform-mask-notice fa fa-exclamation-circle">';
+                $this->_html .= get_string('hasmaskeditems', 'local_tabbedquickform');
+                $this->_html .= '</div>';
             }
         }
     }

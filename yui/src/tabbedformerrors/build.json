@@ -1,0 +1,10 @@
+{
+    "name": "moodle-local_tabbedquickform-tabbedformerrors",
+    "builds": {
+        "moodle-local_tabbedquickform-tabbedformerrors": {
+            "jsfiles": [
+                "tabbedformerrors.js"
+            ]
+        }
+    }
+}
