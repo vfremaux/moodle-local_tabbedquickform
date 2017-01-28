@@ -32,5 +32,4 @@ defined('MOODLE_INTERNAL') || die();
 function local_tabbedquickform_extend_navigation() {
     global $PAGE;
 
-    $PAGE->requires->jquery();
 }
