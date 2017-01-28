@@ -26,10 +26,15 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * This is not the real use of this core hook, but ensures JQuery will be available everywhere
- * in moodle.
+ * We must capture the old block_vmoodle table records and remove the old table
+ *
  */
-function local_tabbedquickform_extend_navigation() {
-    global $PAGE;
+function xmldb_local_tabbedquickform_install() {
+    global $CFG;
 
+    // Register some config keys so we avoid to have them explicitely in config.php
+    if (empty($CFG->moodlepageclassfile)) {
+        set_config('moodlepageclassfile', $CFG->dirroot.'/local/tabbedquickform/classes/jquery_forced_moodle_page.class.php');
+        set_config('moodlepageclass', 'jquery_forced_moodle_page');
+    }
 }
