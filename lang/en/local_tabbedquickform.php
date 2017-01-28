@@ -41,6 +41,7 @@ $string['localtabbedquickformdefaultmode'] = 'Default mode';
 $string['localtabbedquickformenable'] = 'Enable';
 $string['maskkeys'] = 'Mask keys (one per line)';
 $string['masksinsite'] = 'This site has {$a} masks defined.';
+$string['plugindist'] = 'Plugin distribution';
 $string['pluginname'] = 'Tabbed QuickForms';
 $string['reset'] = 'Masks reset';
 $string['resetprofiles'] = 'Reset tuning profile';
