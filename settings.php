@@ -68,7 +68,7 @@ if ($hassiteconfig) {
     $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
     $settings->add(new admin_setting_heading('h1', $label, $desc));
 
-    if (local_tabbedquickform_supports_feature('export/export')) {
+    if (local_tabbedquickform_supports_feature('tools/export')) {
         $a = new StdClass;
         $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/pro/export.php';
         $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/pro/import.php';
