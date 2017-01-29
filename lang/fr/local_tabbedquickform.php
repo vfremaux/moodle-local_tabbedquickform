@@ -41,6 +41,7 @@ $string['localtabbedquickformdefaultmode'] = 'Mode par défaut';
 $string['localtabbedquickformenable'] = 'Activer';
 $string['maskkeys'] = 'Clefs de masques (un par ligne)';
 $string['masksinsite'] = 'Ce site a {$a} masques de formulaires actifs.';
+$string['plugindist'] = 'Distribution du plugin';
 $string['pluginname'] = 'Formulaires à onglets';
 $string['reset'] = 'Réinitialiser les masques';
 $string['sectionhaserrors'] = 'Il y a des erreurs dans cet onglet.';
