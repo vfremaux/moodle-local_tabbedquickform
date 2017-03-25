@@ -45,8 +45,16 @@ function local_tabbedquickform_supports_feature($feature) {
         );
     }
 
-    if (is_dir($CFG->dirroot.'/local/tabbedquickform/pro')) {
-        $versionkey = 'pro';
+    // Check existance of the 'pro' dir in plugin.
+    if (is_dir(__DIR__.'/pro')) {
+        if ($feature == 'emulate/community') {
+            return 'pro';
+        }
+        if (empty($config->emulatecommunity)) {
+            $versionkey = 'pro';
+        } else {
+            $versionkey = 'community';
+        }
     } else {
         $versionkey = 'community';
     }
@@ -59,6 +67,18 @@ function local_tabbedquickform_supports_feature($feature) {
 
     if (!in_array($subfeat, $supports[$versionkey][$feat])) {
         return false;
+    }
+
+    if (array_key_exists($feat, $supports['community'])) {
+        if (in_array($subfeat, $supports['community'][$feat])) {
+            // If community exists, default path points community code.
+            if (isset($prefer[$feat][$subfeat])) {
+                // Configuration tells which location to prefer if explicit.
+                $versionkey = $prefer[$feat][$subfeat];
+            } else {
+                $versionkey = 'community';
+            }
+        }
     }
 
     return $versionkey;
