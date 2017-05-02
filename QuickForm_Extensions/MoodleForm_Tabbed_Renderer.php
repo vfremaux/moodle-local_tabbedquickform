@@ -38,14 +38,18 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
     var $_requiredNoteTemplate =
         "\n\t\t<div class=\"fdescription required\">{requiredNote}</div>";
 
-    var $_tabStartTemplate = 
+    var $_tabStartTemplateNav = 
         "\n\t\t<ul class=\"nav nav-tabs\">";
 
-    var $_tabTemplate = 
-        "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active} {errors} \"><a href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\">{tab}</a></li>";
+    var $_tabStartTemplate = 
+        "\n\t\t<div class=\"tabtree\"><ul class=\"tabrow0\">";
 
-    var $_tabEndTemplate = 
-        "\n\t\t</ul>";
+    var $_tabTemplate = "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active} {errors} \">
+        <a href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\"><span>{tab}</span></a></li>";
+
+    var $_tabEndTemplate = "\n\t\t</ul></div>";
+
+    var $_tabEndTemplateNav = "\n\t\t</ul>";
 
     var $_tabs = array();
 
@@ -474,9 +478,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
 
+        $standardtabs = $this->hasStandardTabs();
+
         // Finally add tabs to the top.
         if (!empty($this->_tabs) && (count($this->_tabs) > 1)) {
-            $tabs = $this->_tabStartTemplate;
+            if (!empty($standardtabs)) {
+                $tabs = $this->_tabStartTemplate;
+            } else {
+                $tabs = $this->_tabStartTemplateNav;
+            }
             $active = true;
             $postformjquery = '';
             foreach ($this->_tabs as $tab) {
@@ -487,7 +497,9 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 if (!$tab->hasVisibleElements && $tab->hasElements && empty($SESSION->adminmaskediting)) {
                     continue;
                 }
+
                 $tabstr = $this->_tabTemplate;
+
                 $tabname = $tab->getName();
                 $tabstr = str_replace('{tabid}', 'tab-'.$tabname, $tabstr);
                 $tabstr = str_replace('{tab}', $tab->toHtml(), $tabstr);
@@ -509,7 +521,11 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 }
                 if ($tabname == 'modstandardelshdr') {
                     // Add a convenient tab separator when an activity module.
-                    $tabs .= '</ul><ul class="nav nav-tabs">';
+                    if (!empty($standardtabs)) {
+                        $tabs .= '</ul><ul class="tabrow0">';
+                    } else {
+                        $tabs .= '</ul><ul class="nav nav-tabs">';
+                    }
                 }
                 $tabs .= $tabstr;
 
@@ -517,7 +533,11 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                     $postformjquery .= 'quickform_toggle_hidden(\''.$tab->getAttribute('id').'\');'."\n";
                 }
             }
-            $tabs .= $this->_tabEndTemplate;
+            if (!empty($standardtabs)) {
+                $tabs .= $this->_tabEndTemplate;
+            } else {
+                $tabs .= $this->_tabEndTemplateNav;
+            }
             $tabs .= '<script type="text/javascript">';
             $tabs .= 'function quickform_toggle_fieldset(fid, nofire) {
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
@@ -562,6 +582,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $this->_html .= '</div>';
             }
         }
+    }
+
+    function hasStandardTabs() {
+
+        // Print a fake tab rendering and check what is inside.
+        $tabrow[0][] = new tabobject('fake', 'http://foo.com', 'fake');
+        $result = print_tabs($tabrow, null, null, null, true);
+
+        return preg_match('/tabtree/', $result);
     }
 
    /**
