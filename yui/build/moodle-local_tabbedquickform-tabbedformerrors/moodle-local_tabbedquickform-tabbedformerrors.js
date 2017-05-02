@@ -52,8 +52,10 @@ Y.extend(TabbedformErrors, Y.Base, {
         fieldsetElement = errorElement.ancestor('fieldset');
         fieldsetid = fieldsetElement.getAttribute('id');
         tabid = 'tab-' + fieldsetid.replace(/id-/, '');
-        tabElement = Y.node('#'+tabid);
+        tabElement = Y.node('#' + tabid);
         tabElement.addClass('tabbedform-error');
+        tabAElement = Y.node('#' + tabid + ' a');
+        tabAElement.addClass('tabbedform-error');
     },
 
 }, {
