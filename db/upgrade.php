@@ -16,24 +16,44 @@
 
 /**
  * @package   local_tabbedquickform
- * @category  blocks
+ * @category  local
  * @author    Valery Fremaux (valery.fremaux@gmail.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+/*
+ * Standard upgrade handler.
+ * @param int $oldversion
+ */
+function xmldb_local_tabbedquickform_upgrade($oldversion = 0) {
+    global $DB;
 
-    'local/tabbedquickform:canswitchfeatured' => array(
+    $result = true;
 
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'student' => CAP_ALLOW,
-            'user' => CAP_ALLOW
-        )
-    ),
-);
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2016120500) {
+
+        /*
+         * convert old boolean markers to unset, protecting eventual previously
+         * explicit default values.
+         */
+        $sql = "
+            UPDATE
+                {config_plugins}
+            SET
+                value = '%UNSET%'
+            WHERE
+                plugin = 'local_tabbedquickform' AND
+                name LIKE 'mask%' AND
+                value = 1
+        ";
+
+        $DB->execute($sql);
+
+        upgrade_plugin_savepoint(true, 2016120500, 'local', 'tabbedquickform');
+    }
+
+    return $result;
+}

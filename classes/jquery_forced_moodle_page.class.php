@@ -15,25 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   local_tabbedquickform
- * @category  blocks
- * @author    Valery Fremaux (valery.fremaux@gmail.com)
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Form for editing HTML block instances.
+ *
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+require_once($CFG->dirroot.'/lib/pagelib.php');
 
-    'local/tabbedquickform:canswitchfeatured' => array(
+class jquery_forced_moodle_page extends moodle_page {
 
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'student' => CAP_ALLOW,
-            'user' => CAP_ALLOW
-        )
-    ),
-);
+    /**
+     * We are sure this function is called before any output is done.
+     * So we can force jquery loading here.
+     */
+    public function ensure_theme_not_set() {
+        global $PAGE;
+
+        $PAGE->requires->jquery();
+
+        return parent::ensure_theme_not_set();
+    }
+}

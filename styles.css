@@ -8,6 +8,10 @@
    display:none;
 }
 
+.quickform-tab a span {
+    white-space: nowrap;
+}
+
 .configure-actions {
     text-align:right;
 }
@@ -54,4 +58,21 @@
     background-color:#A00000 !important;
     background-image:none !important;
     color:white !important;
+}
+
+.tabbedform-error {
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+    background-color: #f8d0d0;
+    background-image:none;
+    color:#b94a48;
+    margin-right: 2px;
+}
+
+.tabbedform-error a {
+    color:#b94a48;
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+    background-color: #f8d0d0 !important;
+    background-image:none;
 }

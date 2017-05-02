@@ -38,14 +38,18 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
     var $_requiredNoteTemplate =
         "\n\t\t<div class=\"fdescription required\">{requiredNote}</div>";
 
-    var $_tabStartTemplate = 
+    var $_tabStartTemplateNav = 
         "\n\t\t<ul class=\"nav nav-tabs\">";
 
-    var $_tabTemplate = 
-        "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active}\"><a href=\"Javascript:quickform_toggle_fieldset('{id}')\">{tab}</a></li>";
+    var $_tabStartTemplate = 
+        "\n\t\t<div class=\"tabtree\"><ul class=\"tabrow0\">";
 
-    var $_tabEndTemplate = 
-        "\n\t\t</ul>";
+    var $_tabTemplate = "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active} {errors} \">
+        <a href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\"><span>{tab}</span></a></li>";
+
+    var $_tabEndTemplate = "\n\t\t</ul></div>";
+
+    var $_tabEndTemplateNav = "\n\t\t</ul>";
 
     var $_tabs = array();
 
@@ -57,8 +61,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      *
      * @var string
      */
-    var $_configureButtonsTemplate =
-        "\n\t<div class=\"configure-actions\"><a href=\"{link}\" class=\"formconfigure\"><input type=\"button\" class=\"{classes}\" value=\"{formconfigurelabel}\" /></a></div>";
+    var $_configureButtonsTemplate = "\n\t<div class=\"configure-actions\"><a href=\"{link}\" class=\"formconfigure\"><input type=\"button\" class=\"{classes}\" value=\"{formconfigurelabel}\" /></a></div>";
 
     /**
      * Array whose keys are element names. If the key exists this is a advanced element
@@ -84,6 +87,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
     private $_hasMaskedElements;
 
     var $_userFormUnfiltered;
+
+    var $_stopFieldsetElements = array('buttonar', 'submitbutton');
 
     /**
      * Constructor
@@ -117,7 +122,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      *
      * @param array $elements form elements which needs to be grouped as advance elements.
      */
-    function setAdvancedElements($elements){
+    function setAdvancedElements($elements) {
         $this->_advancedElements = $elements;
     }
 
@@ -142,7 +147,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $this->_elementTemplates = str_replace('{req}', $this->_reqHTML, $this->_elementTemplates);
         $this->_advancedHTML = $form->getAdvancedHTML();
         $this->_collapseButtons = '';
-        $this->_form = $form; // memorize it for further reference in element filtering
+        $this->_form = $form; // memorize it for further reference in element filtering.
+        $this->_errors = $form->_errors;
         $formid = $form->getAttribute('id');
 
         $alternatemode = optional_param('alternateformmode', '', PARAM_INT);
@@ -157,7 +163,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $record->value = 1;
                 $DB->insert_record('user_preferences', $record);
             }
-        } elseif ($alternatemode === 0) {
+        } else if ($alternatemode === 0) {
             if ($oldrec = $DB->get_record('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
                 $oldrec->value = 0;
                 $DB->update_record('user_preferences', $oldrec);
@@ -171,7 +177,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
         $config = get_config('local_tabbedquickform');
         if (!$DB->record_exists('user_preferences', array('userid' => $USER->id, 'name' => 'alternateformmode'))) {
-            $this->_userFormUnfiltered = $config->defaultmode;
+            $this->_userFormUnfiltered = (isset($config->defaultmode)) ? $config->defaultmode : 'simple';
         } else {
             $userpref = $DB->get_field('user_preferences', 'value', array('userid' => $USER->id, 'name' => 'alternateformmode'));
             if ($config->defaultmode) {
@@ -185,6 +191,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         parent::startForm($form);
 
         $PAGE->requires->js('/local/tabbedquickform/js/module.js');
+        $PAGE->requires->yui_module('moodle-local_tabbedquickform-tabbedformerrors',
+                                    'Y.M.local_tabbedquickform.tabbedformerrors.init', null, null, true);
 
         if ($form->isFrozen()) {
             $this->_formTemplate = "\n<div class=\"mform frozen\">\n{content}\n</div>";
@@ -209,7 +217,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $configure = optional_param('configure', '', PARAM_BOOL);
             if ($configure) {
                 $SESSION->adminmaskediting = true;
-            } elseif ($configure === 0) {
+            } else if ($configure === 0) {
                 $SESSION->adminmaskediting = false;
             }
             $this->_configureButtons = $this->_configureButtonsTemplate;
@@ -253,6 +261,9 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
         */
         if (!empty($this->_advancedElements)) {
+            // Rework Advanced Elements. We need get a workable register of advanced elements so that
+            // hidden fields can be addressed.
+            // print_object_nr($form, 3);
             $PAGE->requires->strings_for_js(array('showmore', 'showless'), 'form');
             $PAGE->requires->yui_module('moodle-form-showadvanced', 'M.form.showadvanced', array(array('formid' => $formid)));
         }
@@ -265,7 +276,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      * @param bool $required if input is required field
      * @param string $error error message to display
      */
-    function startGroup(&$group, $required, $error){
+    function startGroup(&$group, $required, $error) {
         global $CFG, $SESSION, $OUTPUT;
 
         // Make sure the element has an id.
@@ -278,13 +289,26 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
         }
 
-        if (isset($this->_advancedElements[$group->getName()])) {
+        // Deal with feature masking
+        if ($visible = $this->filterFeatures($html, $group, true)) {
+            // Jump over form action buttons
+            if ($group->_name != 'buttonar') {
+                if (!isset($this->_tabs[$this->_currentHeader])) {
+                    $this->_tabs[$this->_currentHeader] = new StdClass;
+                }
+                $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
+            }
+        }
+
+        if (isset($this->_advancedElements[$group->getName()]) && $visible) {
             $html = str_replace(' {advanced}', ' advanced', $html);
             $html = str_replace('{advancedimg}', $this->_advancedHTML, $html);
+            $this->_tabs[$this->_currentHeader]->hasAdvancedVisibleElements = true;
         } else {
             $html = str_replace(' {advanced}', '', $html);
             $html = str_replace('{advancedimg}', '', $html);
         }
+
         if (method_exists($group, 'getHelpButton')) {
             $html = str_replace('{help}', $group->getHelpButton(), $html);
         } else {
@@ -299,26 +323,21 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
         $html = str_replace('{emptylabel}', $emptylabel, $html);
 
-        // Deal with feature masking
-        if ($visible = $this->filterFeatures($html, $group, true)) {
-            // Jump over form action buttons
-            if ($group->_name != 'buttonar') {
-                if (!isset($this->_tabs[$this->_currentHeader])) {
-                    $this->_tabs[$this->_currentHeader] = new StdClass;
-                }
-                $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
-            }
-        }
-
         if ($group->_name != 'buttonar') {
             $this->_tabs[$this->_currentHeader]->hasElements = true;
+        }
+
+        $html = str_replace('{mask}', '', $html);
+
+        if (isset($this->_errors[$group->getName()])) {
+            $this->_tabs[$this->_currentHeader]->hasErrors = true;
         }
 
         $this->_templates[$group->getName()] = $html;
         // Fix for bug in tableless quickforms that didn't allow you to stop a
         // fieldset before a group of elements.
         // if the element name indicates the end of a fieldset, close the fieldset
-        if (   in_array($group->getName(), $this->_stopFieldsetElements)
+        if (in_array($group->getName(), $this->_stopFieldsetElements)
             && $this->_fieldsetsOpen > 0
            ) {
             $this->_html .= $this->_closeFieldsetTemplate;
@@ -335,32 +354,60 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      * @param string $error error message to display
      */
     function renderElement(&$element, $required, $error) {
+        global $PAGE;
 
         // Make sure the element has an id.
         $element->_generateId();
 
-        //adding stuff to place holders in template
-        //check if this is a group element first
+        // Adding stuff to place holders in template.
+        // Check if this is a group element first.
         if (($this->_inGroup) and !empty($this->_groupElementTemplate)) {
-            // so it gets substitutions for *each* element
+            // So it gets substitutions for *each* element.
             $html = $this->_groupElementTemplate;
-        }
-        elseif (method_exists($element, 'getElementTemplateType')){
+        } else if (method_exists($element, 'getElementTemplateType')) {
             $html = $this->_elementTemplates[$element->getElementTemplateType()];
-        }else{
+        } else {
             $html = $this->_elementTemplates['default'];
         }
-        if (isset($this->_advancedElements[$element->getName()])) {
-            $html = str_replace(' {advanced}', ' advanced', $html);
-            $html = str_replace(' {aria-live}', ' aria-live="polite"', $html);
+
+        // Deal with feature masking only if plain elements.
+        if (!$this->_inGroup) {
+            if ($visible = $this->filterFeatures($html, $element)) {
+                if (!($element->_type == 'submit')) {
+                    // Setting _currentHeader to new object because of element->getName().
+                    if (!isset($this->_tabs[$this->_currentHeader])) {
+                        $this->_tabs[$this->_currentHeader] = new StdClass;
+                    }
+                    $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
+                }
+            }
+
+            if (!($element->_type == 'submit')) {
+                // Adding element->getName().' to '.$this->_currentHeader.
+                $this->_tabs[$this->_currentHeader]->hasElements = true;
+            }
         } else {
-            $html = str_replace(' {advanced}', '', $html);
-            $html = str_replace(' {aria-live}', '', $html);
+            $visible = true;
         }
-        if (isset($this->_advancedElements[$element->getName()])||$element->getName() == 'mform_showadvanced') {
-            $html = str_replace('{advancedimg}', $this->_advancedHTML, $html);
-        } else {
-            $html = str_replace('{advancedimg}', '', $html);
+
+        if (isset($this->_errors[$element->getName()])) {
+            $this->_tabs[$this->_currentHeader]->hasErrors = true;
+        }
+
+        if ($visible) {
+            if (isset($this->_advancedElements[$element->getName()])) {
+                $html = str_replace(' {advanced}', ' advanced', $html);
+                $html = str_replace(' {aria-live}', ' aria-live="polite"', $html);
+                $this->_tabs[$this->_currentHeader]->hasAdvancedVisibleElements = true;
+            } else {
+                $html = str_replace(' {advanced}', '', $html);
+                $html = str_replace(' {aria-live}', '', $html);
+            }
+            if (isset($this->_advancedElements[$element->getName()])||$element->getName() == 'mform_showadvanced') {
+                $html = str_replace('{advancedimg}', $this->_advancedHTML, $html);
+            } else {
+                $html = str_replace('{advancedimg}', '', $html);
+            }
         }
         $html = str_replace('{id}', 'fitem_' . $element->getAttribute('id'), $html);
         $html = str_replace('{type}', 'f'.$element->getType(), $html);
@@ -377,6 +424,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $html = str_replace('{help}', '', $html);
         }
 
+<<<<<<< HEAD
         // Deal with feature masking only if plain elements
         if (!$this->_inGroup) {
             if ($visible = $this->filterFeatures($html, $element)) {
@@ -396,12 +444,31 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
 
         // Remove all unprocessed placeholders
+=======
+        // Remove all unprocessed placeholders.
+>>>>>>> MOODLE_32_STABLE
         $html = str_replace('{maskbutton}', '', $html);
+        $html = str_replace('{mask}', '', $html);
+        $html = str_replace('{advanced}', '', $html);
+        $html = str_replace('{advancedimg}', '', $html);
+        $html = str_replace('{aria-live}', '', $html);
 
         if (($this->_inGroup) and !empty($this->_groupElementTemplate)) {
             $this->_groupElementTemplate = $html;
-        } elseif (!isset($this->_templates[$element->getName()])) {
+        } else if (!isset($this->_templates[$element->getName()])) {
             $this->_templates[$element->getName()] = $html;
+        }
+
+        // @TODO : inject mask default value if there is any.
+        $fitemid = $element->getAttribute('id');
+        $bodyid = str_replace('-', '_', $PAGE->bodyid);
+        $maskkey = 'mask_'.$bodyid.'_'.$fitemid;
+        $config = get_config('local_tabbedquickform');
+        if (isset($config->$maskkey) &&
+                ($config->$maskkey != '%UNSET%') &&
+                        ($this->_userFormUnfiltered == 0)) {
+            // If we have an explicit setable value, have a mask and are in simple mode, then apply.
+            $element->setValue($config->$maskkey);
         }
 
         parent::renderElement($element, $required, $error);
@@ -433,16 +500,35 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             }
         }
 
-        // finally add tabs to the top
-        if (!empty($this->_tabs)) {
-            $tabs = $this->_tabStartTemplate;
+        $standardtabs = $this->hasStandardTabs();
+
+        // Finally add tabs to the top.
+        if (!empty($this->_tabs) && (count($this->_tabs) > 1)) {
+            if (!empty($standardtabs)) {
+                $tabs = $this->_tabStartTemplate;
+            } else {
+                $tabs = $this->_tabStartTemplateNav;
+            }
             $active = true;
+            $postformjquery = '';
             foreach ($this->_tabs as $tab) {
 
+<<<<<<< HEAD
                 if ('stdClass' == get_class($tab)) continue;
                 if (!$tab->hasVisibleElements && $tab->hasElements && empty($SESSION->adminmaskediting)) continue;
+=======
+                if ('stdClass' == get_class($tab)) {
+                    continue;
+                }
+                if (!$tab->hasVisibleElements && $tab->hasElements && empty($SESSION->adminmaskediting)) {
+                    continue;
+                }
+
+>>>>>>> MOODLE_32_STABLE
                 $tabstr = $this->_tabTemplate;
-                $tabstr = str_replace('{tabid}', 'tab-'.$tab->getName(), $tabstr);
+
+                $tabname = $tab->getName();
+                $tabstr = str_replace('{tabid}', 'tab-'.$tabname, $tabstr);
                 $tabstr = str_replace('{tab}', $tab->toHtml(), $tabstr);
                 // Set first tab as active.
                 if ($active) {
@@ -453,26 +539,92 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                     $tabstr = str_replace('{active}', '', $tabstr);
                     $tabstr = str_replace('{id}', $tab->getAttribute('id'), $tabstr);
                 }
+                if (@$tab->hasErrors) {
+                    $tabstr = str_replace('{errors}', 'tabbedform-error', $tabstr);
+                    $tabstr = str_replace('{alt}', get_string('sectionhaserrors', 'local_tabbedquickform'), $tabstr);
+                } else {
+                    $tabstr = str_replace('{errors}', '', $tabstr);
+                    $tabstr = str_replace('{alt}', '', $tabstr);
+                }
+                if ($tabname == 'modstandardelshdr') {
+                    // Add a convenient tab separator when an activity module.
+                    if (!empty($standardtabs)) {
+                        $tabs .= '</ul><ul class="tabrow0">';
+                    } else {
+                        $tabs .= '</ul><ul class="nav nav-tabs">';
+                    }
+                }
                 $tabs .= $tabstr;
+
+                if (!$tab->hasAdvancedVisibleElements) {
+                    $postformjquery .= 'quickform_toggle_hidden(\''.$tab->getAttribute('id').'\');'."\n";
+                }
             }
-            $tabs .= $this->_tabEndTemplate;
+            if (!empty($standardtabs)) {
+                $tabs .= $this->_tabEndTemplate;
+            } else {
+                $tabs .= $this->_tabEndTemplateNav;
+            }
             $tabs .= '<script type="text/javascript">';
-            $tabs .= 'function quickform_toggle_fieldset(fid) {
+            $tabs .= 'function quickform_toggle_fieldset(fid, nofire) {
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
+<<<<<<< HEAD
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
                 $(\'#tab-\'+fid).addClass(\'here\');
             }';
+=======
+                if (!$(\'#\'+fid).length) {
+                    fid = $(\'.quickform-tab:first\').attr(\'id\').replace(\'tab-\', \'id_\');
+                }
+                $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
+                $(\'#tab-\'+fid).addClass(\'active\');
+                $(\'#tab-\'+fid).addClass(\'here\');
+                // Just fire field choice to keep it in session for further reloads.
+                if (nofire == undefined) {
+                    url = M.cfg.wwwroot + \'/local/tabbedquickform/ajax/services.php?what=keepfield&fid=\' + fid;
+                    $.get(url, function(data){} );
+                }
+            }'."\n";
+            $tabs .= 'function quickform_toggle_hidden(elmid) {
+        $(\'#\' + elmid + \' .fitem.moreless-actions\').toggleClass(\'quickform-mask-hidden\');
+}';
+>>>>>>> MOODLE_32_STABLE
             $tabs .= '</script>';
-            $this->_html = $tabs.$this->_html;
+
+            $postform = '';
+            if (!empty($postformjquery)) {
+                $postform = '<script type="text/javascript">';
+                $postform .= $postformjquery;
+                if (!empty($SESSION->formactivefield)) {
+                    // If some field is stored in session try active it.
+                    $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
+                }
+                $postform .= '</script>';
+            }
+
+            $this->_html = $tabs.$this->_html.$postform;
 
             $context = context_system::instance();
-            if ((is_siteadmin() || has_capability('local/tabbedquickform:canswitchfeatured', $context)) && $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
-                $this->_html .= '<div class="quickform-mask-notice fa fa-exclamation-circle">'.get_string('hasmaskeditems', 'local_tabbedquickform').'</div>';
+            if ((is_siteadmin() ||
+                    has_capability('local/tabbedquickform:canswitchfeatured', $context)) &&
+                            $this->_hasMaskedElements && !$this->_userFormUnfiltered) {
+                $this->_html .= '<div class="quickform-mask-notice fa fa-exclamation-circle">';
+                $this->_html .= get_string('hasmaskeditems', 'local_tabbedquickform');
+                $this->_html .= '</div>';
             }
         }
+    }
+
+    function hasStandardTabs() {
+
+        // Print a fake tab rendering and check what is inside.
+        $tabrow[0][] = new tabobject('fake', 'http://foo.com', 'fake');
+        $result = print_tabs($tabrow, null, null, null, true);
+
+        return preg_match('/tabtree/', $result);
     }
 
    /**
@@ -490,7 +642,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $id = empty($name) ? '' : ' id="' . $header->getAttribute('id') . '"';
         if (is_null($header->_text)) {
             $header_html = '';
-        } elseif (!empty($name) && isset($this->_templates[$name])) {
+        } else if (!empty($name) && isset($this->_templates[$name])) {
             $header_html = str_replace('{header}', $header->toHtml(), $this->_templates[$name]);
         } else {
             $header_html = str_replace('{header}', $header->toHtml(), $this->_headerTemplate);
@@ -515,7 +667,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         }
         */
 
-        if (isset($this->_advancedElements[$name])){
+        if (isset($this->_advancedElements[$name])) {
             $fieldsetclasses[] = 'containsadvancedelements';
         }
 
@@ -525,6 +677,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
         $openFieldsetTemplate = str_replace('{id}', $id, $this->_openFieldsetTemplate);
         $openFieldsetTemplate = str_replace('{classes}', join(' ', $fieldsetclasses), $openFieldsetTemplate);
+        $header_html = str_replace('{mask}', '', $header_html);
 
         $this->_html .= $openFieldsetTemplate . $header_html;
         $this->_currentHeader = $name;
@@ -532,6 +685,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
         // Register header in tabs.
         $header->hasVisibleElements = 0;
+        $header->hasAdvancedVisibleElements = 0;
         $header->hasElements = 0;
         $this->_tabs[$name] = $header;
     }
@@ -541,7 +695,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      *
      * @return array
      */
-    function getStopFieldsetElements(){
+    function getStopFieldsetElements() {
         return $this->_stopFieldsetElements;
     }
 
@@ -558,28 +712,33 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         $bodyid = str_replace('-', '_', $PAGE->bodyid);
         $maskkey = 'mask_'.$bodyid.'_'.$fitemid;
         if (empty($SESSION->adminmaskediting)) {
-            if (!empty($config->$maskkey) && ($this->_userFormUnfiltered == 0)) {
+            if (isset($config->$maskkey) && ($this->_userFormUnfiltered == 0)) {
+                /*
+                 * Normal use of the for will add masking css to hide the element if masked.
+                 */
                 $this->_hasMaskedElements = true;
                 $html = str_replace('{mask}', 'quickform-mask-hidden', $html);
                 return false;
             } else {
+                // Unmasked elements. Just remove the mask placeholder.
                 $html = str_replace('{mask}', '', $html);
             }
+            // Remove any mask switch button.
             $html = str_replace('{maskbutton}', '', $html);
             return true;
         } else {
-            // Admin is editing the form featuring
-            if (!in_array(@$element->_attributes['name'], $this->_form->_required)) {
+            // Admin is editing the form featuring.
+            if (!in_array(@$element->_attributes['name'], $this->_form->_required) || @$config->allowmaskingmandatories) {
                 $maskedpix = $OUTPUT->pix_url('masked', 'local_tabbedquickform');
                 $unmaskedpix = $OUTPUT->pix_url('unmasked', 'local_tabbedquickform');
                 $groupflag = ($isgroup) ? 'true' : 'false' ;
-                if (empty($config->$maskkey)) {
+                if (!isset($config->$maskkey)) {
                     $html = str_replace('{mask}', 'quickform-mask-selectable', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$unmaskedpix.'"></a></div>', $html);
                 } else {
                     $html = str_replace('{mask}', 'quickform-mask-selected', $html);
-                    $jscall = 'javascript:quickform_toggle_mask(\''.$CFG->wwwroot.'\', \''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
+                    $jscall = 'javascript:quickform_toggle_mask(\''.$bodyid.'\', \''.$fitemid.'\', '.$groupflag.', \''.$maskedpix.'\', \''.$unmaskedpix.'\')';
                     $html = str_replace('{maskbutton}', '<div class="quickform-mask-button"><a href="'.$jscall.'"><img id="mask_'.$fitemid.'" src="'.$maskedpix.'"></a></div>', $html);
                 }
             } else {
@@ -590,6 +749,11 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         return true;
     }
 
+    /**
+     * checks if there are some masks registered in global plugin config. this will speedup
+     * form construction if there are no masks recorded.
+     * @return boolean
+     */
     function has_filters() {
         global $PAGE, $DB;
 

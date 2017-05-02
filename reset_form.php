@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   local_tabbedquickform
- * @category  blocks
- * @author    Valery Fremaux (valery.fremaux@gmail.com)
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+require_once($CFG->dirroot.'/lib/formslib.php');
 
-    'local/tabbedquickform:canswitchfeatured' => array(
+class Mask_Reset_Form extends moodleform {
 
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'student' => CAP_ALLOW,
-            'user' => CAP_ALLOW
-        )
-    ),
-);
+    public function definition() {
+
+        $mform = $this->_form;
+
+        $mform->addElement('text', 'pattern', get_string('deleterange', 'local_tabbedquickform'), '');
+        $mform->setType('pattern', PARAM_TEXT);
+
+        $this->add_action_buttons(true , get_string('confirm'));
+    }
+}
