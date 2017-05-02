@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
+/*
  * An event processing when a form has errors to make some signalling to
  * user.
  *
@@ -24,10 +24,12 @@
  * @main       moodle-local_tabbedquickform-tannedformerrors
  */
 
-/**
+/*
  * @namespace M.local_tabbedquickform
  * @class tabbedformerrors
  */
+
+// jshint unused:false, undef:false
 
 function TabbedformErrors() {
     TabbedformErrors.superclass.constructor.apply(this, arguments);
@@ -38,7 +40,9 @@ var LOGNAME = 'moodle-local_tabbedquickform-tabbedformerrors';
 Y.extend(TabbedformErrors, Y.Base, {
     initializer: function() {
         // Subscribe to form error event, when there's an error in a tab.
-        Y.Global.on(M.core.globalEvents.FORM_ERROR, this.report_errors, this);
+        if (M.core.globalEvents) {
+            Y.Global.on(M.core.globalEvents.FORM_ERROR, this.report_errors, this);
+        }
     },
 
     report_errors: function(e) {
@@ -50,6 +54,8 @@ Y.extend(TabbedformErrors, Y.Base, {
         tabid = 'tab-' + fieldsetid.replace(/id-/, '');
         tabElement = Y.node('#' + tabid);
         tabElement.addClass('tabbedform-error');
+        tabAElement = Y.node('#' + tabid + ' a');
+        tabAElement.addClass('tabbedform-error');
     },
 
 }, {
