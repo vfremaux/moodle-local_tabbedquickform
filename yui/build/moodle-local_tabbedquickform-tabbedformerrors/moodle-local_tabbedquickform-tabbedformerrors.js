@@ -40,7 +40,9 @@ var LOGNAME = 'moodle-local_tabbedquickform-tabbedformerrors';
 Y.extend(TabbedformErrors, Y.Base, {
     initializer: function() {
         // Subscribe to form error event, when there's an error in a tab.
-        Y.Global.on(M.core.globalEvents.FORM_ERROR, this.report_errors, this);
+        if (M.core.globalEvents) {
+            Y.Global.on(M.core.globalEvents.FORM_ERROR, this.report_errors, this);
+        }
     },
 
     report_errors: function(e) {
@@ -50,8 +52,10 @@ Y.extend(TabbedformErrors, Y.Base, {
         fieldsetElement = errorElement.ancestor('fieldset');
         fieldsetid = fieldsetElement.getAttribute('id');
         tabid = 'tab-' + fieldsetid.replace(/id-/, '');
-        tabElement = Y.node('#'+tabid);
+        tabElement = Y.node('#' + tabid);
         tabElement.addClass('tabbedform-error');
+        tabAElement = Y.node('#' + tabid + ' a');
+        tabAElement.addClass('tabbedform-error');
     },
 
 }, {
