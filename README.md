@@ -28,7 +28,7 @@ that does not previously exist in core.
 Some themes may not provide jquery on all screens. Tabbed quickform needs jquery and is not restricted
 to any subcontext nor domain.
 
-If you experiment some misfunctionning of some tabs, you will need to add : 
+If you experiment some misfunctionning of some tabs, you will need to add :
 
 // Tabbed quickform addition for generalizing the Jquery.
 global $PAGE;
