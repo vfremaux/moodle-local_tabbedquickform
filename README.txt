@@ -10,7 +10,7 @@ very carefull when choosing what to hide.
 ====== Install the patchs ========
 
 Needed Patchs are packaged into a standard dual meta directory to help integrators to process
-automated patch integration. 
+automated patch integration.
 
 __patch directory contains the patched files that are used for the current version of Moodle. Patched
 files are given into a consistant relative path from moodle root installation. 
@@ -28,3 +28,18 @@ that does not previously exist in core.
 
 - diff the __patch and the __reference files to identify patch points
 - report into your moodle files version
+
+==== ensuring jquery in all screens / Theme change
+
+Some themes may not provide jquery on all screens. Tabbed quickform needs jquery and is not restricted
+to any subcontext nor domain.
+
+If you experiment some misfunctionning of some tabs, you will need to add : 
+
+// Tabbed quickform addition for generalizing the Jquery.
+global $PAGE;
+if (!empty($PAGE) && !$PAGE->state) {
+    $PAGE->requires->jquery();
+}
+
+at the end of your theme config.php file.
