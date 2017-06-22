@@ -23,3 +23,17 @@ that does not previously exist in core.
 - diff the __patch and the __reference files to identify patch points
 - report into your moodle files version
 
+==== ensuring jquery in all screens / Theme change
+
+Some themes may not provide jquery on all screens. Tabbed quickform needs jquery and is not restricted
+to any subcontext nor domain.
+
+If you experiment some misfunctionning of some tabs, you will need to add : 
+
+// Tabbed quickform addition for generalizing the Jquery.
+global $PAGE;
+if (!empty($PAGE) && !$PAGE->state) {
+    $PAGE->requires->jquery();
+}
+
+at the end of your theme config.php file.
