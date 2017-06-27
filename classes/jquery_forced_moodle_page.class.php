@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form for editing HTML block instances.
+ * Tries to force jquery loading independantly of the theme.
  *
  * @package     local_tabbedquickform
  * @category    local
