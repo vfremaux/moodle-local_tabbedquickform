@@ -34,6 +34,8 @@ function local_tabbedquickform_supports_feature($feature) {
     global $CFG;
     static $supports;
 
+    $config = get_config('local_tabbedquickform');
+
     if (!isset($supports)) {
         $supports = array(
             'pro' => array(
