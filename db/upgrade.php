@@ -55,5 +55,19 @@ function xmldb_local_tabbedquickform_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2016120500, 'local', 'tabbedquickform');
     }
 
+    if ($oldversion < 2017070300) {
+
+        // Deletes eventual moodle_page class diverting settings.
+        $sql = '
+            DELETE FROM
+                {config}
+            WHERE
+                value LIKE "%jquery_forced_mooodle_page%"
+        ';
+        $DB->execute($sql);
+
+        upgrade_plugin_savepoint(true, 2017070300, 'local', 'tabbedquickform');
+    }
+
     return $result;
 }
