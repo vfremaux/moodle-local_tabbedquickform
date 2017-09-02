@@ -212,7 +212,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $PAGE->requires->string_for_js('changesmadereallygoaway', 'moodle');
         }
 
-        if (is_siteadmin()) {
+        $systemcontext = context_system::instance();
+        if (is_siteadmin() || has_capability('local/tabbedquickform:configure', $systemcontext)) {
             // change state.
             $configure = optional_param('configure', '', PARAM_BOOL);
             if ($configure) {
@@ -223,12 +224,12 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $this->_configureButtons = $this->_configureButtonsTemplate;
             if (empty($SESSION->adminmaskediting)) {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('enterconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('configure' => true));
+                $link = new moodle_url(qualified_me(), array('configure' => true));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-off', $this->_configureButtons);
             } else {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('exitconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('configure' => false));
+                $link = new moodle_url(qualified_me(), array('configure' => false));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-on', $this->_configureButtons);
             }
@@ -238,13 +239,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             if ($this->_userFormUnfiltered == 0) {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('fullfeatured', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
+                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             } else {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('filterfeatures', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
+                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             }

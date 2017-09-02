@@ -43,3 +43,5 @@ if (!empty($PAGE) && !$PAGE->state) {
 }
 
 at the end of your theme config.php file.
+
+2017071400 : Adds the configure capability.

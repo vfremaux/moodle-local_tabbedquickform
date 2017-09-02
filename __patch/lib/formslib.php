@@ -2934,7 +2934,11 @@ $config = get_config('local_tabbedquickform');
 $excluded = false;
 global $PAGE;
 if ($exclusions = explode("\n", @$config->excludepagetypes)) {
-    $excluded = in_array($PAGE->bodyid, $exclusions);
+    foreach ($exclusions as $exc) {
+        $exc = str_replace('*', '.*', trim($exc));
+        $exc = str_replace('?', '.', $exc);
+        $excluded = $excluded || preg_match("/$exc/", $PAGE->bodyid);
+    }
 }
 if (!empty($config->enable) && !$excluded) {
     include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
