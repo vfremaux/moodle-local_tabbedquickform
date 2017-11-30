@@ -36,4 +36,10 @@ if (!empty($PAGE) && !$PAGE->state) {
     $PAGE->requires->jquery();
 }
 
+<<<<<<< HEAD
 at the end of your theme config.php file.
+=======
+at the end of your theme config.php file.
+
+2017071400 : Adds the configure capability.
+>>>>>>> MOODLE_33_STABLE

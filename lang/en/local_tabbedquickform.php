@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 >>>>>>> MOODLE_32_STABLE
 
 $string['tabbedquickform:canswitchfeatured'] = 'Can switch full and filtered features';
+$string['tabbedquickform:configure'] = 'Can configure forms';
 
 $string['allowmaskingmandatories'] = 'Allow masking mandatory fields';
 $string['complete'] = 'Complete';
