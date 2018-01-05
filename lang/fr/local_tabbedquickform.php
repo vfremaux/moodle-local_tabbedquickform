@@ -23,6 +23,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['tabbedquickform:canswitchfeatured'] = 'Peut basculer en version complète';
+$string['tabbedquickform:configure'] = 'Peut cponfigurer les formulaires';
 
 $string['allowmaskingmandatories'] = 'Permettre de masquer les champs obligatoires';
 $string['complete'] = 'Complet';
