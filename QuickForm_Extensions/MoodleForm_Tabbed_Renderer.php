@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * MoodleQuickForm renderer
@@ -212,7 +226,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $PAGE->requires->string_for_js('changesmadereallygoaway', 'moodle');
         }
 
-        if (is_siteadmin()) {
+        $systemcontext = context_system::instance();
+        if (is_siteadmin() || has_capability('local/tabbedquickform:configure', $systemcontext)) {
             // change state.
             $configure = optional_param('configure', '', PARAM_BOOL);
             if ($configure) {
@@ -223,12 +238,12 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $this->_configureButtons = $this->_configureButtonsTemplate;
             if (empty($SESSION->adminmaskediting)) {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('enterconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('configure' => true));
+                $link = new moodle_url(qualified_me(), array('configure' => true));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-off', $this->_configureButtons);
             } else {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('exitconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('configure' => false));
+                $link = new moodle_url(qualified_me(), array('configure' => false));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-on', $this->_configureButtons);
             }
@@ -238,13 +253,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             if ($this->_userFormUnfiltered == 0) {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('fullfeatured', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
+                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             } else {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('filterfeatures', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
+                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             }
@@ -543,12 +558,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
-                if (!$(\'#\'+fid).length) {
+
+                if (!$(\'#\' + fid).length) {
                     fid = $(\'.quickform-tab:first\').attr(\'id\').replace(\'tab-\', \'id_\');
                 }
+                shortfid = fid.replace(\'id_\', \'\');
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
-                $(\'#tab-\'+fid).addClass(\'active\');
-                $(\'#tab-\'+fid).addClass(\'here\');
+                $(\'#tab-\' + shortfid).addClass(\'active\');
+                $(\'#tab-\' + shortfid).addClass(\'here\');
+
                 // Just fire field choice to keep it in session for further reloads.
                 if (nofire == undefined) {
                     url = M.cfg.wwwroot + \'/local/tabbedquickform/ajax/services.php?what=keepfield&fid=\' + fid;
@@ -561,15 +579,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs .= '</script>';
 
             $postform = '';
+            $postform = '<script type="text/javascript">';
             if (!empty($postformjquery)) {
-                $postform = '<script type="text/javascript">';
                 $postform .= $postformjquery;
-                if (!empty($SESSION->formactivefield)) {
-                    // If some field is stored in session try active it.
-                    $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
-                }
-                $postform .= '</script>';
             }
+            if (!empty($SESSION->formactivefield)) {
+                // If some field is stored in session try active it.
+                $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
+            }
+            $postform .= '</script>';
 
             $this->_html = $tabs.$this->_html.$postform;
 
