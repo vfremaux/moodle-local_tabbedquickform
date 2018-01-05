@@ -36,4 +36,12 @@ $capabilities = array(
             'user' => CAP_ALLOW
         )
     ),
+
+    'local/tabbedquickform:configure' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+        )
+    ),
 );
