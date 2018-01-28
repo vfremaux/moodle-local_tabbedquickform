@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * MoodleQuickForm renderer
@@ -575,17 +589,24 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
 <<<<<<< HEAD
+<<<<<<< HEAD
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
                 $(\'#tab-\'+fid).addClass(\'active\');
                 $(\'#tab-\'+fid).addClass(\'here\');
             }';
 =======
                 if (!$(\'#\'+fid).length) {
+=======
+
+                if (!$(\'#\' + fid).length) {
+>>>>>>> MOODLE_33_STABLE
                     fid = $(\'.quickform-tab:first\').attr(\'id\').replace(\'tab-\', \'id_\');
                 }
+                shortfid = fid.replace(\'id_\', \'\');
                 $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
-                $(\'#tab-\'+fid).addClass(\'active\');
-                $(\'#tab-\'+fid).addClass(\'here\');
+                $(\'#tab-\' + shortfid).addClass(\'active\');
+                $(\'#tab-\' + shortfid).addClass(\'here\');
+
                 // Just fire field choice to keep it in session for further reloads.
                 if (nofire == undefined) {
                     url = M.cfg.wwwroot + \'/local/tabbedquickform/ajax/services.php?what=keepfield&fid=\' + fid;
@@ -599,15 +620,15 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs .= '</script>';
 
             $postform = '';
+            $postform = '<script type="text/javascript">';
             if (!empty($postformjquery)) {
-                $postform = '<script type="text/javascript">';
                 $postform .= $postformjquery;
-                if (!empty($SESSION->formactivefield)) {
-                    // If some field is stored in session try active it.
-                    $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
-                }
-                $postform .= '</script>';
             }
+            if (!empty($SESSION->formactivefield)) {
+                // If some field is stored in session try active it.
+                $postform .= 'quickform_toggle_fieldset(\''.$SESSION->formactivefield.'\', true);'."\n";
+            }
+            $postform .= '</script>';
 
             $this->_html = $tabs.$this->_html.$postform;
 
