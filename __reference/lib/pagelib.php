@@ -232,12 +232,9 @@ class moodle_page {
      */
     protected $_requires = null;
 
-<<<<<<< HEAD
-=======
     /** @var page_requirements_manager Saves the requirement manager object used before switching to to fragments one. */
     protected $savedrequires = null;
 
->>>>>>> MOODLE_33_STABLE
     /**
      * @var string The capability required by the user in order to edit blocks
      * and block settings on this page.
@@ -622,10 +619,6 @@ class moodle_page {
      */
     protected function magic_get_blocks() {
         global $CFG;
-<<<<<<< HEAD
-
-=======
->>>>>>> MOODLE_33_STABLE
         if (is_null($this->_blocks)) {
             if (!empty($CFG->blockmanagerclass)) {
                 if (!empty($CFG->blockmanagerclassfile)) {
@@ -900,10 +893,7 @@ class moodle_page {
         // JavaScript for the fragment to be collected. _wherethemewasinitialised is set when header() is called.
         if (!empty($this->_wherethemewasinitialised)) {
             // Change the current requirements manager over to the fragment manager to capture JS.
-<<<<<<< HEAD
-=======
             $this->savedrequires = $this->_requires;
->>>>>>> MOODLE_33_STABLE
             $this->_requires = new fragment_requirements_manager();
         } else {
             throw new coding_exception('$OUTPUT->header() needs to be called before collecting JavaScript requirements.');
@@ -911,8 +901,6 @@ class moodle_page {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Switches back from collecting fragment JS requirement to the original requirement manager
      */
     public function end_collecting_javascript_requirements() {
@@ -924,7 +912,6 @@ class moodle_page {
     }
 
     /**
->>>>>>> MOODLE_33_STABLE
      * Should the current user see this page in editing mode.
      * That is, are they allowed to edit this page, and are they currently in
      * editing mode.

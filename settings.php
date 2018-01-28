@@ -13,29 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-<<<<<<< HEAD
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * @package   local_tabbedquickform
- * @category  blocks
- * @author    Valery Fremaux (valery.fremaux@gmail.com)
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-// settings default init
-if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code 
-    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
-    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
-} else {
-    // Standard Moodle code
-    $capability = 'moodle/site:config';
-    $hasconfig = $hassiteconfig = has_capability($capability, context_system::instance());
-}
-=======
->>>>>>> MOODLE_32_STABLE
 
 /**
  * @package   local_tabbedquickform

@@ -14,21 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-<<<<<<< HEAD
-defined('MOODLE_INTERNAL') || die();
-
-=======
->>>>>>> MOODLE_32_STABLE
 /**
  * @package   local_tabbedquickform
  * @category  blocks
  * @author    Valery Fremaux (valery.fremaux@gmail.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-<<<<<<< HEAD
-=======
 defined('MOODLE_INTERNAL') || die();
->>>>>>> MOODLE_32_STABLE
 
 $string['tabbedquickform:canswitchfeatured'] = 'Can switch full and filtered features';
 $string['tabbedquickform:configure'] = 'Can configure forms';

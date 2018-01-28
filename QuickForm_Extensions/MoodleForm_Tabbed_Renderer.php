@@ -439,29 +439,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $html = str_replace('{help}', '', $html);
         }
 
-<<<<<<< HEAD
-        // Deal with feature masking only if plain elements
-        if (!$this->_inGroup) {
-            if ($visible = $this->filterFeatures($html, $element)) {
-                if (!($element->_type == 'submit')) {
-                    // echo "Setting $this->_currentHeader to true because of ".$element->getName()."<br>";
-                    if (!isset($this->_tabs[$this->_currentHeader])) {
-                        $this->_tabs[$this->_currentHeader] = new StdClass;
-                    }
-                    $this->_tabs[$this->_currentHeader]->hasVisibleElements = true;
-                }
-            }
-    
-            if (!($element->_type == 'submit')) {
-                // echo "Adding ".$element->getName().' to '.$this->_currentHeader.'<br/>';
-                $this->_tabs[$this->_currentHeader]->hasElements = true;
-            }
-        }
-
-        // Remove all unprocessed placeholders
-=======
         // Remove all unprocessed placeholders.
->>>>>>> MOODLE_32_STABLE
         $html = str_replace('{maskbutton}', '', $html);
         $html = str_replace('{mask}', '', $html);
         $html = str_replace('{advanced}', '', $html);
@@ -528,10 +506,6 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $postformjquery = '';
             foreach ($this->_tabs as $tab) {
 
-<<<<<<< HEAD
-                if ('stdClass' == get_class($tab)) continue;
-                if (!$tab->hasVisibleElements && $tab->hasElements && empty($SESSION->adminmaskediting)) continue;
-=======
                 if ('stdClass' == get_class($tab)) {
                     continue;
                 }
@@ -539,10 +513,6 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                     continue;
                 }
 
-<<<<<<< HEAD
->>>>>>> MOODLE_32_STABLE
-=======
->>>>>>> MOODLE_33_STABLE
                 $tabstr = $this->_tabTemplate;
 
                 $tabname = $tab->getName();
@@ -588,18 +558,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $(\'.quickform-fieldset\').addClass(\'quickform-hidden-tab\');
                 $(\'.quickform-tab\').removeClass(\'active\');
                 $(\'.quickform-tab\').removeClass(\'here\');
-<<<<<<< HEAD
-<<<<<<< HEAD
-                $(\'#\'+fid).removeClass(\'quickform-hidden-tab\');
-                $(\'#tab-\'+fid).addClass(\'active\');
-                $(\'#tab-\'+fid).addClass(\'here\');
-            }';
-=======
-                if (!$(\'#\'+fid).length) {
-=======
 
                 if (!$(\'#\' + fid).length) {
->>>>>>> MOODLE_33_STABLE
                     fid = $(\'.quickform-tab:first\').attr(\'id\').replace(\'tab-\', \'id_\');
                 }
                 shortfid = fid.replace(\'id_\', \'\');
@@ -616,7 +576,6 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $tabs .= 'function quickform_toggle_hidden(elmid) {
         $(\'#\' + elmid + \' .fitem.moreless-actions\').toggleClass(\'quickform-mask-hidden\');
 }';
->>>>>>> MOODLE_32_STABLE
             $tabs .= '</script>';
 
             $postform = '';

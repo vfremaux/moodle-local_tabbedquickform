@@ -26,23 +26,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-<<<<<<< HEAD
-$plugin->version = 2017070301;
-$plugin->requires = 2016120500;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.2.0 (Build 2017070301)';
-
-// Non moodle attributes.
-$plugin->codeincrement = '3.2.0002';
-=======
 $plugin->version = 2017071400;
-$plugin->requires = 2017050500;
+$plugin->requires = 2017110800;
 $plugin->component = 'local_tabbedquickform';
 $plugin->maturity = MATURITY_RC;
-$plugin->release = '3.3.0 (Build 2017071400)';
+$plugin->release = '3.4.0 (Build 2017071400)';
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.3.0003';
->>>>>>> MOODLE_33_STABLE
+$plugin->codeincrement = '3.4.0003';
 $plugin->privacy = 'dualrelease';

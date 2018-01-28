@@ -75,8 +75,6 @@
     border-radius: 4px;
     background-color: #f8d0d0 !important;
     background-image:none;
-<<<<<<< HEAD
-=======
 }
 
 /* fixes the mask visibility on editors and file managers */
@@ -84,5 +82,4 @@
 .quickform-mask-button + .fitemtitle + .ffilemanager,
 .quickform-mask-button + .fitemtitle + .ffilepicker {
     margin-right: 65px;
->>>>>>> MOODLE_33_STABLE
 }
