@@ -1,4 +1,17 @@
 
+.quickform-tab {
+    float: left;
+    padding: 5px 10px;
+}
+
+.quickform-tab.active.here {
+    border-top: 1px solid #888;
+    border-left: 1px solid #888;
+    border-right: 1px solid #888;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
 .quickform-hidden-tab {
     visibility:hidden;
     display:none;
