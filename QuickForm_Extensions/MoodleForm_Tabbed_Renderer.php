@@ -713,8 +713,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         } else {
             // Admin is editing the form featuring.
             if (!in_array(@$element->_attributes['name'], $this->_form->_required) || @$config->allowmaskingmandatories) {
-                $maskedpix = $OUTPUT->pix_url('masked', 'local_tabbedquickform');
-                $unmaskedpix = $OUTPUT->pix_url('unmasked', 'local_tabbedquickform');
+                $maskedpix = $OUTPUT->image_url('masked', 'local_tabbedquickform');
+                $unmaskedpix = $OUTPUT->image_url('unmasked', 'local_tabbedquickform');
                 $groupflag = ($isgroup) ? 'true' : 'false' ;
                 if (!isset($config->$maskkey)) {
                     $html = str_replace('{mask}', 'quickform-mask-selectable', $html);
