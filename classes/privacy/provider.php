@@ -14,24 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version details.
- *
- * @package     local_tabbedquickform
- * @category    local
- * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace local_tabbedquickform\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2017071400;
-$plugin->requires = 2018042700;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.5.0 (Build 2017071400)';
-
-// Non moodle attributes.
-$plugin->codeincrement = '3.5.0003';
-$plugin->privacy = 'dualrelease';
+class provider implements \core_privacy\local\metadata\null_provider {
+}
