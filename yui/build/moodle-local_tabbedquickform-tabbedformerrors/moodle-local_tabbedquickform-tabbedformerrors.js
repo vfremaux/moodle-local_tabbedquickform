@@ -15,7 +15,7 @@ YUI.add('moodle-local_tabbedquickform-tabbedformerrors', function (Y, NAME) {
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
+/*
  * An event processing when a form has errors to make some signalling to
  * user.
  *
@@ -26,10 +26,12 @@ YUI.add('moodle-local_tabbedquickform-tabbedformerrors', function (Y, NAME) {
  * @main       moodle-local_tabbedquickform-tannedformerrors
  */
 
-/**
+/*
  * @namespace M.local_tabbedquickform
  * @class tabbedformerrors
  */
+
+// jshint unused:false, undef:false
 
 function TabbedformErrors() {
     TabbedformErrors.superclass.constructor.apply(this, arguments);
@@ -68,5 +70,6 @@ var NS = Y.namespace('M.local_tabbedquickform.tabbedformerrors');
 NS.init = function(config) {
     return new TabbedformErrors(config);
 };
+
 
 }, '@VERSION@', {"requires": ["base-base", "io-base"]});
