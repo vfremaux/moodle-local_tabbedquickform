@@ -28,6 +28,8 @@ $string['tabbedquickform:configure'] = 'Can configure forms';
 $string['allowmaskingmandatories'] = 'Allow masking mandatory fields';
 $string['complete'] = 'Complete';
 $string['deleterange'] = 'Selector pattern (LIKE)';
+$string['emulatecommunity'] = 'Emulate the community version.';
+$string['emulatecommunity_desc'] = 'Switches the code to the community version. The result will be more compatible, but some features will not be available anymore.';
 $string['enterconfigure'] = 'Enter form tuning';
 $string['excludepagetypes'] = 'Exclude page types';
 $string['exitconfigure'] = 'Exit form tuning';
@@ -40,6 +42,10 @@ $string['hasmaskeditems'] = 'This form has masked items';
 $string['import'] = 'Masks import';
 $string['localtabbedquickformdefaultmode'] = 'Default mode';
 $string['localtabbedquickformenable'] = 'Enable';
+$string['licenseprovider'] = 'Pro License provider';
+$string['licenseprovider_desc'] = 'Input here your provider key';
+$string['licensekey'] = 'Pro license key';
+$string['licensekey_desc'] = 'Input here the product license key you got from your provider';
 $string['maskkeys'] = 'Mask keys (one per line)';
 $string['masksinsite'] = 'This site has {$a} masks defined.';
 $string['plugindist'] = 'Plugin distribution';
@@ -79,8 +85,7 @@ $string['plugindist_desc'] = '
 <p>This plugin is the community version and is published for anyone to use as is and check the plugin\'s
 core application. A "pro" version of this plugin exists and is distributed under conditions to feed the life cycle, upgrade, documentation
 and improvement effort.</p>
+<p>Note that both components local_sharedresources and mod_sharedresource must work using the same distribution level.</p>
 <p>Please contact one of our distributors to get "Pro" version support.</p>
-<ul><li><a href="http://service.activeprolearn.com/local/shop/front/view.php?id=1">ActiveProLearn SAS</a></li>
-<li><a href="http://www.edunao.com">Edunao SAS</a></li></ul>
-';
+<p><a href="http://www.mylearningfactory.com/index.php/documentation/Distributeurs?lang=en_utf8">MyLF Distributors</a></p>';
 

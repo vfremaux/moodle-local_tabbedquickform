@@ -28,6 +28,8 @@ $string['tabbedquickform:configure'] = 'Peut cponfigurer les formulaires';
 $string['allowmaskingmandatories'] = 'Permettre de masquer les champs obligatoires';
 $string['complete'] = 'Complet';
 $string['deleterange'] = 'Motif de sélection (LIKE)';
+$string['emulatecommunity'] = 'Emuler la version communautaire';
+$string['emulatecommunity_desc'] = 'Bascule le code sur la version communautaire. Le résultat est plus compatible avec d\'autres installations, mais certaines fonctionnalités avancées ne seront plus disponibles.';
 $string['enterconfigure'] = 'Configurer le formulaire';
 $string['excludepagetypes'] = 'Types de page exclus';
 $string['exitconfigure'] = 'Quitter la configuration';
@@ -38,6 +40,10 @@ $string['filterfeatures'] = 'Accéder au mode simplifié';
 $string['fullfeatured'] = 'Accéder au mode complet';
 $string['hasmaskeditems'] = 'Ce formulaire a des champs masqués';
 $string['import'] = 'Importer les masques';
+$string['licenseprovider'] = 'Fournisseur version Pro';
+$string['licenseprovider_desc'] = 'Entrez la clef de votre distributeur.';
+$string['licensekey'] = 'Clef de license pro';
+$string['licensekey_desc'] = 'Entrez ici la clef de produit que vous avez reçu de votre distributeur.';
 $string['localtabbedquickformdefaultmode'] = 'Mode par défaut';
 $string['localtabbedquickformenable'] = 'Activer';
 $string['maskkeys'] = 'Clefs de masques (un par ligne)';
@@ -78,9 +84,8 @@ devez mettre en oeuvre la modification de la librairie /lib/formslib.php telle q
 
 $string['plugindist_desc'] = '
 <p>Ce plugin est distribué dans la communauté Moodle pour l\'évaluation de ses fonctions centrales
-correspondant à une utilisation courante du plugin. Une version "professionnelle" de ce plugn existe et est distribuée
+correspondant à une utilisation courante du plugin. Une version "professionnelle" de ce plugin existe et est distribuée
 sous certaines conditions, afin de soutenir l\'effort de développement, amélioration; documentation et suivi des versions.</p>
 <p>Contactez un distributeur pour obtenir la version "Pro" et son support.</p>
-<ul><li><a href="http://service.activeprolearn.com/local/shop/front/view.php?id=1">ActiveProLearn SAS</a></li>
-<li><a href="http://www.edunao.com">Edunao SAS</a></li></ul>
-';
+<p>Notez que les deux composant local_sharedresources et mod_sharedresource doivent fonctionner au même niveau de distribution</p>
+<p><a href="http://www.mylearningfactory.com/index.php/documentation/Distributeurs?lang=fr_utf8">Distributeurs MyLF</a></p>';
