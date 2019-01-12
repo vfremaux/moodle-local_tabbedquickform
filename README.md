@@ -39,3 +39,5 @@ if (!empty($PAGE) && !$PAGE->state) {
 at the end of your theme config.php file.
 
 2017071400 : Adds the configure capability.
+
+2018090200 : Add more page exclusion keys (user bulk form, data export form)
