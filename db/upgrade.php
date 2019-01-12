@@ -69,5 +69,10 @@ function xmldb_local_tabbedquickform_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2017070301, 'local', 'tabbedquickform');
     }
 
+    if ($oldversion < 2018090200) {
+        set_config('excludepagetypes', "page-mod-tracker-reportissue\npage-local-vmoodle-view\npage-admin-tool-mnetusers*\npage-admin-user-user_bulk\npage-mod-data-export", 'local_tabedquickform');
+        upgrade_plugin_savepoint(true, 2018090200, 'local', 'tabbedquickform');
+    }
+
     return $result;
 }

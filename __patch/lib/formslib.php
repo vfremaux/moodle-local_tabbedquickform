@@ -3220,9 +3220,11 @@ $excluded = false;
 global $PAGE;
 if ($exclusions = explode("\n", @$config->excludepagetypes)) {
     foreach ($exclusions as $exc) {
-        $exc = str_replace('*', '.*', trim($exc));
-        $exc = str_replace('?', '.', $exc);
-        $excluded = $excluded || preg_match("/$exc/", $PAGE->bodyid);
+        if (!empty($exc)) {
+            $exc = str_replace('*', '.*', trim($exc));
+            $exc = str_replace('?', '.', $exc);
+            $excluded = $excluded || preg_match("/$exc/", $PAGE->bodyid);
+        }
     }
 }
 if (!empty($config->enable) && !$excluded) {
