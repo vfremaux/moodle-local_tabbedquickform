@@ -22,8 +22,12 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+// Capabilities.
 $string['tabbedquickform:canswitchfeatured'] = 'Can switch full and filtered features';
 $string['tabbedquickform:configure'] = 'Can configure forms';
+
+// Privacy.
+$string['privacy:metadata'] = 'The Local TabbedQuickForm plugin does not store any personal data about any user.';
 
 $string['allowmaskingmandatories'] = 'Allow masking mandatory fields';
 $string['complete'] = 'Complete';
