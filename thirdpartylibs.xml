@@ -21,4 +21,11 @@
     <version></version>
     <licenseversion></licenseversion>
   </library>
+  <library>
+    <location>extlibs</location>
+    <name>Extra lbs</name>
+    <license>GPL</license>
+    <version></version>
+    <licenseversion></licenseversion>
+  </library>
 </libraries>

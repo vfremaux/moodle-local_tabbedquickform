@@ -25,6 +25,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot.'/local/tabbedquickform/extlibs/extralib.php');
+
 /**
  * This is not the real use of this core hook, but ensures JQuery will be available everywhere
  * in moodle.
@@ -83,7 +85,7 @@ function local_tabbedquickform_hook() {
         }
 
         if (!$excluded) {
-            $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Tabbed_Renderer();
+            set_globals('_HTML_QuickForm_default_renderer'], new MoodleQuickForm_Tabbed_Renderer());
         }
     }
 }
