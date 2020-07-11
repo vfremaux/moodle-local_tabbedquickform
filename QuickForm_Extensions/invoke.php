@@ -14,22 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Form for editing HTML block instances.
- *
- * @package     local_tabbedquickform
- * @category    local
- * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   Valery Fremaux <valery.fremaux@gmail.com> (MyLearningFactory.com)
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+/*
+ * This is a super global setup that changes the default factory for QuickForm renderers.
+ * It is NOT part of Moodle code standards and should not be reintegrated into upper files.
  */
-defined('MOODLE_INTERNAL') || die();
 
-/**
- * This is not the real use of this core hook, but ensures JQuery will be available everywhere
- * in moodle.
- */
-function local_tabbedquickform_extend_navigation() {
-    global $PAGE;
-
-}
+$GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Tabbed_Renderer();

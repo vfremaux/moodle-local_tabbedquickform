@@ -48,7 +48,8 @@ if ($hassiteconfig) {
     $key = 'local_tabbedquickform/excludepagetypes';
     $label = get_string('excludepagetypes', 'local_tabbedquickform');
     $desc = get_string('excludepagetypes_desc', 'local_tabbedquickform');
-    $defaults = '';
+    $defaults = "page-mod-tracker-reportissue\npage-local-vmoodle-view\npage-admin-tool-mnetusers*\n";
+    $defaults .= "page-admin-user-user_bulk\npage-mod-data-export";
     $settings->add(new admin_setting_configtextarea($key, $label, $desc, $defaults));
 
     $a = new StdClass;
