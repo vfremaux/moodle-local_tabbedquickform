@@ -3214,21 +3214,9 @@ class MoodleQuickForm_Rule_Required extends HTML_QuickForm_Rule {
  */
 $GLOBALS['_HTML_QuickForm_default_renderer'] = new MoodleQuickForm_Renderer();
 // PATCH+ : Overloads quickform renderer.
-require_once($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/MoodleForm_Tabbed_Renderer.php');
-$config = get_config('local_tabbedquickform');
-$excluded = false;
-global $PAGE;
-if ($exclusions = explode("\n", @$config->excludepagetypes)) {
-    foreach ($exclusions as $exc) {
-        if (!empty($exc)) {
-            $exc = str_replace('*', '.*', trim($exc));
-            $exc = str_replace('?', '.', $exc);
-            $excluded = $excluded || preg_match("/$exc/", $PAGE->bodyid);
-        }
-    }
-}
-if (!empty($config->enable) && !$excluded) {
-    include($CFG->dirroot.'/local/tabbedquickform/QuickForm_Extensions/invoke.php');
+if (is_dir($CFG->dirroot.'/local/tabbedquickform')) {
+    include_once($CFG->dirroot.'/local/tabbedquickform/lib.php');
+    local_tabbedquickform_hook();
 }
 // PATCH-.
 
