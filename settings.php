@@ -24,17 +24,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/local/tabbedquickform/locallib.php');
 
-// Settings default init.
-if (is_dir($CFG->dirroot.'/local/adminsettings')) {
-    // Integration driven code.
-    require_once($CFG->dirroot.'/local/adminsettings/lib.php');
-    list($hasconfig, $hassiteconfig, $capability) = local_adminsettings_access();
-} else {
-    // Standard Moodle code.
-    $capability = 'moodle/site:config';
-    $hasconfig = $hassiteconfig = has_capability($capability, context_system::instance());
-}
-
 if ($hassiteconfig) {
     // Needs this condition or there is error on login page.
     $settings = new admin_settingpage('local_tabbedquickform', get_string('pluginname', 'local_tabbedquickform'));
@@ -59,8 +48,7 @@ if ($hassiteconfig) {
     $key = 'local_tabbedquickform/excludepagetypes';
     $label = get_string('excludepagetypes', 'local_tabbedquickform');
     $desc = get_string('excludepagetypes_desc', 'local_tabbedquickform');
-    $defaults = "page-mod-tracker-reportissue\npage-local-vmoodle-view\npage-admin-tool-mnetusers*\n";
-    $defaults .= "page-admin-user-user_bulk\npage-mod-data-export\n";
+    $defaults = '';
     $settings->add(new admin_setting_configtextarea($key, $label, $desc, $defaults));
 
     $a = new StdClass;

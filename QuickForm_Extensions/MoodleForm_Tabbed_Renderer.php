@@ -280,7 +280,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             // hidden fields can be addressed.
             // print_object_nr($form, 3);
             $PAGE->requires->strings_for_js(array('showmore', 'showless'), 'form');
-            $PAGE->requires->yui_module('moodle-form-showadvanced', 'M.form.showadvanced', array(array('formid' => $formid)));
+            // From Moodle 3.7 : remove old YUI libs.
+            $PAGE->requires->js_call_amd('core_form/showadvanced', 'init', [$formid]);
         }
     }
 
