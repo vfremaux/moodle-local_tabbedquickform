@@ -13,12 +13,12 @@
 }
 
 .quickform-hidden-tab {
-    visibility:hidden;
-    display:none;
+    visibility: hidden;
+    display: none;
 }
 
 .nav.nav-tabs a[aria-haspopup=true] {
-   display:none;
+   display: none;
 }
 
 .quickform-tab a span {
@@ -26,68 +26,68 @@
 }
 
 .configure-actions {
-    text-align:right;
+    text-align: right;
 }
 
 .quickform-mask-selectable {
-    border:1px dashed #e0e0e0;
-    background-color:#fdfdfd;
-    padding:3px;
+    border: 1px dashed #ddd;
+    background-color: #fdfdfd;
+    padding: 3px;
 }
 
 .quickform-mask-selected {
-    opacity:0.4;
-    -moz-opacity:0.4;
-    background-color:#fbfbfb;
-    padding:3px;
+    opacity: 0.4;
+    -moz-opacity: 0.4;
+    background-color: #fbfbfb;
+    padding: 3px;
 }
 
 .quickform-mask-button {
-    float:right;
-    width:50px;
-    padding:10px;
+    float: right;
+    width: 50px;
+    padding: 10px;
 }
 
 .quickform-mask-hidden {
-    display:none;
+    display: none;
 }
 
 .quickform-mask-notice {
-    font-size:small;
-    color:#c00000;
+    font-size: small;
+    color: #c00;
 }
 
 .quickform-mask-notice.fa.fa-exclamation-circle::before {
-  padding-right: 10px;
+    padding-right: 10px;
 }
 
 .quickform-configure-off {
-    background-color:#00A000 !important;
-    background-image:none !important;
-    color:white !important;
+    background-color: #0a0 !important;
+    background-image: none !important;
+    color: white !important;
 }
 
 .quickform-configure-on {
-    background-color:#A00000 !important;
-    background-image:none !important;
-    color:white !important;
+    background-color: #a00 !important;
+    background-image: none !important;
+    color: white !important;
 }
 
 .tabbedform-error {
     border: 1px solid #eed3d7;
     border-radius: 4px;
     background-color: #f8d0d0;
-    background-image:none;
-    color:#b94a48;
+    background-image: none;
+    color: #b94a48;
     margin-right: 2px;
 }
 
 .tabbedform-error a {
-    color:#b94a48;
+    color: #b94a48;
     border: 1px solid #eed3d7;
     border-radius: 4px;
     background-color: #f8d0d0 !important;
-    background-image:none;
+    background-image: none;
 }
 
 /* fixes the mask visibility on editors and file managers */
