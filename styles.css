@@ -54,7 +54,7 @@
 
 .quickform-mask-notice {
     font-size: small;
-    color: #c00000;
+    color: #c00;
 }
 
 .quickform-mask-notice.fa.fa-exclamation-circle::before {
@@ -62,13 +62,13 @@
 }
 
 .quickform-configure-off {
-    background-color: #00A000 !important;
+    background-color: #0a0 !important;
     background-image: none !important;
     color: white !important;
 }
 
 .quickform-configure-on {
-    background-color: #A00000 !important;
+    background-color: #a00 !important;
     background-image: none !important;
     color: white !important;
 }
