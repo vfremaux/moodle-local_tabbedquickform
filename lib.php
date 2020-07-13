@@ -85,7 +85,7 @@ function local_tabbedquickform_hook() {
         }
 
         if (!$excluded) {
-            set_globals('_HTML_QuickForm_default_renderer'], new MoodleQuickForm_Tabbed_Renderer());
+            set_globals('_HTML_QuickForm_default_renderer', new MoodleQuickForm_Tabbed_Renderer());
         }
     }
 }
