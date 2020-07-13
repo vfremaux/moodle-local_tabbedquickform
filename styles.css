@@ -13,12 +13,12 @@
 }
 
 .quickform-hidden-tab {
-    visibility:hidden;
-    display:none;
+    visibility: hidden;
+    display: none;
 }
 
 .nav.nav-tabs a[aria-haspopup=true] {
-   display:none;
+   display: none;
 }
 
 .quickform-tab a span {
@@ -26,11 +26,11 @@
 }
 
 .configure-actions {
-    text-align:right;
+    text-align: right;
 }
 
 .quickform-mask-selectable {
-    border: 1px dashed #e0e0e0;
+    border: 1px dashed #ddd;
     background-color: #fdfdfd;
     padding: 3px;
 }
@@ -58,7 +58,7 @@
 }
 
 .quickform-mask-notice.fa.fa-exclamation-circle::before {
-  padding-right: 10px;
+    padding-right: 10px;
 }
 
 .quickform-configure-off {

@@ -71,7 +71,7 @@ function xmldb_local_tabbedquickform_upgrade($oldversion = 0) {
 
     if ($oldversion < 2018090200) {
         $config = "page-mod-tracker-reportissue\npage-local-vmoodle-view\npage-admin-tool-mnetusers*\n";
-        $config /= "page-admin-user-user_bulk\npage-mod-data-export";
+        $config .= "page-admin-user-user_bulk\npage-mod-data-export";
         set_config('excludepagetypes', $config, 'local_tabedquickform');
         upgrade_plugin_savepoint(true, 2018090200, 'local', 'tabbedquickform');
     }
