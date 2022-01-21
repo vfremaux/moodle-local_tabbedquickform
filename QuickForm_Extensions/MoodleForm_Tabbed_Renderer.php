@@ -26,6 +26,9 @@
  * @copyright 2007 Jamie Pratt <me@jamiep.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+require_once($CFG->dirroot.'/local/tabbedquickform/compatlib.php');
+
 class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless {
 
     /** @var array Element template array */
@@ -238,12 +241,12 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             $this->_configureButtons = $this->_configureButtonsTemplate;
             if (empty($SESSION->adminmaskediting)) {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('enterconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(qualified_me(), array('configure' => true));
+                $link = new moodle_url(qualified_me(), ['configure' => true, 'sesskey' => sesskey()]);
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-off', $this->_configureButtons);
             } else {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('exitconfigure', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(qualified_me(), array('configure' => false));
+                $link = new moodle_url(qualified_me(), ['configure' => false, 'sesskey' => sesskey()]);
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', 'quickform-configure-on', $this->_configureButtons);
             }
@@ -253,13 +256,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             if ($this->_userFormUnfiltered == 0) {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('fullfeatured', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 1 : 0 ));
+                $link = new moodle_url(qualified_me(), ['alternateformmode' => ($config->defaultmode) ? 1 : 0, 'sesskey' => sesskey()]);
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             } else {
                 $this->_configureButtons .= $this->_configureButtonsTemplate;
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('filterfeatures', 'local_tabbedquickform'), $this->_configureButtons);
-                $link = new moodle_url(qualified_me(), array('alternateformmode' => ($config->defaultmode) ? 0 : 1 ));
+                $link = new moodle_url(qualified_me(), ['alternateformmode' => ($config->defaultmode) ? 0 : 1, 'sesskey' => sesskey()]);
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
                 $this->_configureButtons = str_replace('{classes}', '', $this->_configureButtons);
             }
@@ -278,10 +281,8 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         if (!empty($this->_advancedElements)) {
             // Rework Advanced Elements. We need get a workable register of advanced elements so that
             // hidden fields can be addressed.
-            // print_object_nr($form, 3);
             $PAGE->requires->strings_for_js(array('showmore', 'showless'), 'form');
-            // From Moodle 3.7 : remove old YUI libs.
-            $PAGE->requires->js_call_amd('core_form/showadvanced', 'init', [$formid]);
+            local_tabbedquickform_require_js($formid);
         }
     }
 
