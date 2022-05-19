@@ -57,7 +57,7 @@ if ($hassiteconfig) {
     $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
     $settings->add(new admin_setting_heading('h1', $label, $desc));
 
-    if (local_courseindex_supports_feature('emulate/community') == 'pro') {
+    if (local_tabbedquickform_supports_feature('emulate/community') == 'pro') {
         include_once($CFG->dirroot.'/local/tabbedquickform/pro/prolib.php');
         $promanager = local_tabbedquickform\pro_manager::instance();
         $promanager->add_settings($ADMIN, $settings);
