@@ -42,7 +42,6 @@ $string['localtabbedquickformdefaultmode'] = 'Mode par défaut';
 $string['localtabbedquickformenable'] = 'Activer';
 $string['maskkeys'] = 'Clefs de masques (un par ligne)';
 $string['masksinsite'] = 'Ce site a {$a} masques de formulaires actifs.';
-$string['plugindist'] = 'Distribution du plugin';
 $string['pluginname'] = 'Formulaires à onglets';
 $string['reset'] = 'Réinitialiser les masques';
 $string['sectionhaserrors'] = 'Il y a des erreurs dans cet onglet.';
@@ -76,11 +75,4 @@ Activer le rendu à onglets et le filtrage fonctionnel des formulaires. Pour ren
 devez mettre en oeuvre la modification de la librairie /lib/formslib.php telle que décrite dans le fichier README.txt.
 ';
 
-$string['plugindist_desc'] = '
-<p>Ce plugin est distribué dans la communauté Moodle pour l\'évaluation de ses fonctions centrales
-correspondant à une utilisation courante du plugin. Une version "professionnelle" de ce plugn existe et est distribuée
-sous certaines conditions, afin de soutenir l\'effort de développement, amélioration; documentation et suivi des versions.</p>
-<p>Contactez un distributeur pour obtenir la version "Pro" et son support.</p>
-<ul><li><a href="http://service.activeprolearn.com/local/shop/front/view.php?id=1">ActiveProLearn SAS</a></li>
-<li><a href="http://www.edunao.com">Edunao SAS</a></li></ul>
-';
+include(__DIR__.'/pro_additional_strings.php');

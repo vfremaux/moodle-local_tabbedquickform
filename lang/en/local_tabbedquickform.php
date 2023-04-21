@@ -46,7 +46,6 @@ $string['localtabbedquickformdefaultmode'] = 'Default mode';
 $string['localtabbedquickformenable'] = 'Enable';
 $string['maskkeys'] = 'Mask keys (one per line)';
 $string['masksinsite'] = 'This site has {$a} masks defined.';
-$string['plugindist'] = 'Plugin distribution';
 $string['pluginname'] = 'Tabbed QuickForms';
 $string['reset'] = 'Masks reset';
 $string['resetprofiles'] = 'Reset tuning profile';
@@ -79,12 +78,4 @@ You may <a href="{$a->exporturl}">export</a> and <a href="{$a->importurl}">impor
 as simple list of mask keys. You may also want to globally <a href="{$a->reseturl}">reset</a> all form masks that you have setup.
 ';
 
-$string['plugindist_desc'] = '
-<p>This plugin is the community version and is published for anyone to use as is and check the plugin\'s
-core application. A "pro" version of this plugin exists and is distributed under conditions to feed the life cycle, upgrade, documentation
-and improvement effort.</p>
-<p>Please contact one of our distributors to get "Pro" version support.</p>
-<ul><li><a href="http://service.activeprolearn.com/local/shop/front/view.php?id=1">ActiveProLearn SAS</a></li>
-<li><a href="http://www.edunao.com">Edunao SAS</a></li></ul>
-';
-
+include(__DIR__.'/pro_additional_strings.php');

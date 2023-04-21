@@ -24,14 +24,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+function local_tabbedquickform_require_js($formid) {
+    global $PAGE;
 
-$plugin->version = 2021102100;
-$plugin->requires = 2020060900;
-$plugin->component = 'local_tabbedquickform';
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.9.0 (Build 2021102100)';
-
-// Non moodle attributes.
-$plugin->codeincrement = '3.9.0006';
-$plugin->privacy = 'dualrelease';
+    // From 3.7 version.
+    $PAGE->requires->js_call_amd('core_form/showadvanced', 'init', [$formid]);
+}
