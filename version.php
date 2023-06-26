@@ -31,6 +31,7 @@ $plugin->requires = 2020060900;
 $plugin->component = 'local_tabbedquickform';
 $plugin->maturity = MATURITY_RC;
 $plugin->release = '3.9.0 (Build 2021102100)';
+$plugin->supported = [39, 311];
 
 // Non moodle attributes.
 $plugin->codeincrement = '3.9.0006';

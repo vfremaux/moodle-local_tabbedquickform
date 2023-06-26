@@ -68,7 +68,9 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
 
     var $_tabEndTemplateNav = "\n\t\t</ul>";
 
-    var $_tabs = array();
+    var $_tabs = [];
+
+    var $_excluded = ['interests', 'tags'];
 
     /**
      * Admin buttons for form mask setup string template.
@@ -714,7 +716,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
             return true;
         } else {
             // Admin is editing the form featuring.
-            if (!in_array(@$element->_attributes['name'], $this->_form->_required) || @$config->allowmaskingmandatories) {
+            if (!in_array(@$element->_attributes['name'], $this->_excluded) && (!in_array(@$element->_attributes['name'], $this->_form->_required) || @$config->allowmaskingmandatories)) {
                 $maskedpix = $OUTPUT->image_url('masked', 'local_tabbedquickform');
                 $unmaskedpix = $OUTPUT->image_url('unmasked', 'local_tabbedquickform');
                 $groupflag = ($isgroup) ? 'true' : 'false' ;
