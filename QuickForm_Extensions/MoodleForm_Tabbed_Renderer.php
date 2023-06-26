@@ -56,13 +56,13 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
         "\n\t\t<div class=\"fdescription required\">{requiredNote}</div>";
 
     var $_tabStartTemplateNav = 
-        "\n\t\t<ul class=\"nav nav-tabs\">";
+        "\n\t\t<ul class=\"quickform nav nav-tabs moremenu observed\">";
 
     var $_tabStartTemplate = 
-        "\n\t\t<div class=\"tabtree\"><ul class=\"tabrow0\">";
+        "\n\t\t<div class=\"quickform tabtree moremenu observed\"><ul class=\"tabrow0\">";
 
     var $_tabTemplate = "\n\t\t<li id=\"{tabid}\" class=\"quickform-tab {active} {errors} \">
-        <a href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\"><span>{tab}</span></a></li>";
+        <a class=\"nav-link\" href=\"Javascript:quickform_toggle_fieldset('{id}') \" alt=\"{alt}\"><span>{tab}</span></a></li>";
 
     var $_tabEndTemplate = "\n\t\t</ul></div>";
 
@@ -245,7 +245,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('enterconfigure', 'local_tabbedquickform'), $this->_configureButtons);
                 $link = new moodle_url(qualified_me(), ['configure' => true, 'sesskey' => sesskey()]);
                 $this->_configureButtons = str_replace('{link}', $link, $this->_configureButtons);
-                $this->_configureButtons = str_replace('{classes}', 'quickform-configure-off', $this->_configureButtons);
+                $this->_configureButtons = str_replace('{classes}', 'quickform-configure-off btn-primary', $this->_configureButtons);
             } else {
                 $this->_configureButtons = str_replace('{formconfigurelabel}', get_string('exitconfigure', 'local_tabbedquickform'), $this->_configureButtons);
                 $link = new moodle_url(qualified_me(), ['configure' => false, 'sesskey' => sesskey()]);
@@ -543,7 +543,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
                     if (!empty($standardtabs)) {
                         $tabs .= '</ul><ul class="tabrow0">';
                     } else {
-                        $tabs .= '</ul><ul class="nav nav-tabs">';
+                        $tabs .= '</ul><ul class="nav nav-tabs moremenu observed">';
                     }
                 }
                 $tabs .= $tabstr;

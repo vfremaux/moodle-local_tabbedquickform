@@ -27,6 +27,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\navigation\views\primary;
+use core\navigation\views\secondary;
+use core\navigation\output\primary as primaryoutput;
+use core\output\activity_header;
+
 /**
  * $PAGE is a central store of information about the current page we are
  * generating in response to the user's request.
@@ -50,6 +55,8 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read stdClass $activityrecord The row from the activities own database table (for example
  *      the forum or quiz table) that this page belongs to. Will be null
  *      if this page is not within a module.
+ * @property-read activity_header $activityheader The activity header for the page, representing standard components
+ *      displayed within the header
  * @property-read array $alternativeversions Mime type => object with ->url and ->title.
  * @property-read block_manager $blocks The blocks manager object for this page.
  * @property-read array $blockmanipulations
@@ -71,7 +78,7 @@ defined('MOODLE_INTERNAL') || die();
  *      course table. (Also available as $COURSE global.) If we are not inside
  *      an actual course, this will be the site course.
  * @property-read string $devicetypeinuse The name of the device type in use
- * @property-read string $docspath The path to the Moodle docs for this page.
+ * @property-read string $docspath The path to the Help and documentation.
  * @property-read string $focuscontrol The id of the HTML element to be focused when the page has loaded.
  * @property-read bool $headerprinted True if the page header has already been printed.
  * @property-read string $heading The main heading that should be displayed at the top of the <body>.
@@ -79,6 +86,10 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $layout_options An arrays with options for the layout file.
  * @property-read array $legacythemeinuse True if the legacy browser theme is in use.
  * @property-read navbar $navbar The navbar object used to display the navbar
+ * @property-read secondary $secondarynav The secondary navigation object
+ *      used to display the secondarynav in boost
+ * @property-read primary $primarynav The primary navigation object used to display the primary nav in boost
+ * @property-read primaryoutput $primarynavcombined The primary navigation object used to display the primary nav in boost
  * @property-read global_navigation $navigation The navigation structure for this page.
  * @property-read xhtml_container_stack $opencontainers Tracks XHTML tags on this page that have been opened but not closed.
  *      mainly for internal use by the rendering code.
@@ -198,7 +209,7 @@ class moodle_page {
     protected $_subpage = '';
 
     /**
-     * @var string Set a different path to use for the 'Moodle docs for this page' link.
+     * @var string Set a different path to use for the 'Help and documentation' link.
      * By default, it uses the path of the file for instance mod/quiz/attempt.
      */
     protected $_docspath = null;
@@ -295,6 +306,24 @@ class moodle_page {
     protected $_flatnav = null;
 
     /**
+     * @var secondary Contains the nav nodes that will appear
+     * in the secondary navigation.
+     */
+    protected $_secondarynav = null;
+
+    /**
+     * @var primary Contains the nav nodes that will appear
+     * in the primary navigation.
+     */
+    protected $_primarynav = null;
+
+    /**
+     * @var primaryoutput Contains the combined nav nodes that will appear
+     * in the primary navigation. Includes - primarynav, langmenu, usermenu
+     */
+    protected $_primarynavcombined = null;
+
+    /**
      * @var navbar Contains the navbar structure.
      */
     protected $_navbar = null;
@@ -352,6 +381,51 @@ class moodle_page {
      * This is only used by themes that use the settings menu.
      */
     protected $_forcesettingsmenu = false;
+
+    /**
+     * @var array Array of header actions HTML to add to the page header actions menu.
+     */
+    protected $_headeractions = [];
+
+    /**
+     * @var bool Should the region main settings menu be rendered in the header.
+     */
+    protected $_regionmainsettingsinheader = false;
+
+    /**
+     * @var bool Should the secondary menu be rendered.
+     */
+    protected $_hassecondarynavigation = true;
+
+    /**
+     * @var bool Should the secondary menu be rendered as a tablist as opposed to a menubar.
+     */
+    protected $_hastablistsecondarynavigation = false;
+
+    /**
+     * @var string the key of the secondary node to be activated.
+     */
+    protected $_activekeysecondary = null;
+
+    /**
+     * @var string the key of the primary node to be activated.
+     */
+    protected $_activenodeprimary = null;
+
+    /**
+     * @var activity_header The activity header for the page.
+     */
+    protected $_activityheader;
+
+    /**
+     * @var bool The value of displaying the navigation overflow.
+     */
+    protected $_navigationoverflow = true;
+
+    /**
+     * @var bool Whether to override/remove all editing capabilities for blocks on the page.
+     */
+    protected $_forcelockallblocks = false;
 
     /**
      * Force the settings menu to be displayed on this page. This will only force the
@@ -579,7 +653,7 @@ class moodle_page {
 
     /**
      * Please do not call this method directly, use the ->docspath syntax. {@link moodle_page::__get()}.
-     * @return string the path to the Moodle docs for this page.
+     * @return string the path to the Help and documentation.
      */
     protected function magic_get_docspath() {
         if (is_string($this->_docspath)) {
@@ -774,6 +848,65 @@ class moodle_page {
     }
 
     /**
+     * Returns the activity header object
+     * @return activity_header
+     */
+    protected function magic_get_activityheader(): activity_header {
+        global $USER;
+        if ($this->_activityheader === null) {
+            $class = activity_header::class;
+            // Try and load a custom class first.
+            if (class_exists("mod_{$this->activityname}\\output\\activity_header")) {
+                $class = "mod_{$this->activityname}\\output\\activity_header";
+            }
+
+            $this->_activityheader = new $class($this, $USER);
+        }
+        return $this->_activityheader;
+    }
+
+    /**
+     * Returns the secondary navigation object
+     * @return secondary
+     */
+    protected function magic_get_secondarynav() {
+        if ($this->_secondarynav === null) {
+            $class = 'core\navigation\views\secondary';
+            // Try and load a custom class first.
+            if (class_exists("mod_{$this->activityname}\\local\\views\\secondary")) {
+                $class = "mod_{$this->activityname}\\local\\views\\secondary";
+            }
+
+            $this->_secondarynav = new $class($this);
+            $this->_secondarynav->initialise();
+        }
+        return $this->_secondarynav;
+    }
+
+    /**
+     * Returns the primary navigation object
+     * @return primary
+     */
+    protected function magic_get_primarynav() {
+        if ($this->_primarynav === null) {
+            $this->_primarynav = new primary($this);
+            $this->_primarynav->initialise();
+        }
+        return $this->_primarynav;
+    }
+
+    /**
+     * Returns the primary navigation object
+     * @return primary
+     */
+    protected function magic_get_primarynavcombined() {
+        if ($this->_primarynavcombined === null) {
+            $this->_primarynavcombined = new primaryoutput($this);
+        }
+        return $this->_primarynavcombined;
+    }
+
+    /**
      * Returns request IP address.
      *
      * @return string IP address or null if unknown
@@ -924,10 +1057,12 @@ class moodle_page {
 
     /**
      * Does the user have permission to edit blocks on this page.
+     * Can be forced to false by calling the force_lock_all_blocks() method.
+     *
      * @return bool
      */
     public function user_can_edit_blocks() {
-        return has_capability($this->_blockseditingcap, $this->_context);
+        return $this->_forcelockallblocks ? false : has_capability($this->_blockseditingcap, $this->_context);
     }
 
     /**
@@ -1190,6 +1325,14 @@ class moodle_page {
     }
 
     /**
+     * Force set secondary_nav. Useful in cases where we dealing with non course modules. e.g. blocks, tools.
+     * @param secondary $nav
+     */
+    public function set_secondarynav(secondary $nav) {
+        $this->_secondarynav = $nav;
+    }
+
+    /**
      * Adds a CSS class to the body tag of the page.
      *
      * @param string $class add this class name ot the class attribute on the body tag.
@@ -1231,9 +1374,10 @@ class moodle_page {
      * This is normally used as the main heading at the top of the content.
      *
      * @param string $heading the main heading that should be displayed at the top of the <body>.
+     * @param bool $applyformatting apply format_string() - by default true.
      */
-    public function set_heading($heading) {
-        $this->_heading = format_string($heading);
+    public function set_heading($heading, bool $applyformatting = true) {
+        $this->_heading = $applyformatting ? format_string($heading) : clean_text($heading);
     }
 
     /**
@@ -1271,7 +1415,7 @@ class moodle_page {
     }
 
     /**
-     * Set a different path to use for the 'Moodle docs for this page' link.
+     * Set a different path to use for the 'Help and documentation' link.
      *
      * By default, it uses the pagetype, which is normally the same as the
      * script name. So, for example, for mod/quiz/attempt.php, pagetype is
@@ -1460,29 +1604,28 @@ class moodle_page {
     }
 
     /**
-     * This function indicates that current page requires the https when $CFG->loginhttps enabled.
-     * Since loginhttps was removed this is no longer required or functional.
+     * Remove access to editing/moving on all blocks on a page.
+     * This overrides any capabilities and is intended only for pages where no user (including admins) should be able to
+     * modify blocks on the page (eg My Courses).
      *
-     * @deprecated since Moodle 3.4 MDL-42834 - please do not use this function any more.
-     * @todo MDL-46267 This will be deleted in Moodle 3.8
-     *
-     * @throws coding_exception
+     * @return void
      */
-    public function https_required() {
-        debugging('https_required() has been deprecated. It no longer needs to be called.', DEBUG_DEVELOPER);
+    public function force_lock_all_blocks(): void {
+        $this->_forcelockallblocks = true;
     }
 
     /**
-     * Makes sure that page previously marked with https_required() is really using https://, if not it redirects to https://
-     * Since loginhttps was removed this is no longer required or functional.
-     *
-     * @deprecated since Moodle 3.4 MDL-42834 - please do not use this function any more.
-     * @todo MDL-46267 This will be deleted in Moodle 3.8
-     *
-     * @throws coding_exception
+     * @deprecated since Moodle 3.4
+     */
+    public function https_required() {
+        throw new coding_exception('https_required() cannot be used anymore.');
+    }
+
+    /**
+     * @deprecated since Moodle 3.4
      */
     public function verify_https_required() {
-        debugging('verify_https_required() has been deprecated. It no longer needs to be called.', DEBUG_DEVELOPER);
+        throw new coding_exception('verify_https_required() cannot be used anymore.');
     }
 
     // Initialisation methods =====================================================
@@ -1554,11 +1697,6 @@ class moodle_page {
         }
 
         $this->_theme->setup_blocks($this->pagelayout, $this->blocks);
-        if ($this->_theme->enable_dock && !empty($CFG->allowblockstodock)) {
-            $this->requires->strings_for_js(array('addtodock', 'undockitem', 'dockblock', 'undockblock', 'undockall', 'hidedockpanel', 'hidepanel'), 'block');
-            $this->requires->string_for_js('thisdirectionvertical', 'langconfig');
-            $this->requires->yui_module('moodle-core-dock-loader', 'M.core.dock.loader.initLoader');
-        }
 
         if ($this === $PAGE) {
             $target = null;
@@ -1577,6 +1715,15 @@ class moodle_page {
         }
 
         $this->_wherethemewasinitialised = debug_backtrace();
+    }
+
+    /**
+     * For diagnostic/debugging purposes, find where the theme setup was triggered.
+     *
+     * @return null|array null if theme not yet setup. Stacktrace if it was.
+     */
+    public function get_where_theme_was_initialised() {
+        return $this->_wherethemewasinitialised;
     }
 
     /**
@@ -1616,7 +1763,8 @@ class moodle_page {
         }
 
         $mnetpeertheme = '';
-        if (isloggedin() and isset($CFG->mnet_localhost_id) and $USER->mnethostid != $CFG->mnet_localhost_id) {
+        $mnetvarsok = isset($CFG->mnet_localhost_id) && isset($USER->mnethostid);
+        if (isloggedin() and $mnetvarsok and $USER->mnethostid != $CFG->mnet_localhost_id) {
             require_once($CFG->dirroot.'/mnet/peer.php');
             $mnetpeer = new mnet_peer();
             $mnetpeer->set_id($USER->mnethostid);
@@ -2027,7 +2175,9 @@ class moodle_page {
         $reportnode = null;
         $navigationnodeerror =
                 'Could not find the navigation node requested. Please check that the node you are looking for exists.';
-        if ($userid != $USER->id) {
+        if ($userid != $USER->id  || $this->context->contextlevel == CONTEXT_COURSE) {
+            // Within a course context we need to properly indicate how we have come to the page,
+            // regardless of whether it's currently logged in user or not.
             // Check that we have a valid node.
             if (empty($newusernode)) {
                 // Throw an error if we ever reach here.
@@ -2047,6 +2197,130 @@ class moodle_page {
             $reportnode = $myprofilenode->add(get_string('reports'));
         }
         // Finally add the report to the navigation tree.
-        $reportnode->add($nodeinfo['name'], $nodeinfo['url'], navigation_node::TYPE_COURSE);
+        $reportnode->add($nodeinfo['name'], $nodeinfo['url'], navigation_node::TYPE_CUSTOM, null, null,
+            new pix_icon('i/report', $nodeinfo['name']));
+    }
+
+    /**
+     * Add some HTML to the list of actions to render in the header actions menu.
+     *
+     * @param string $html The HTML to add.
+     */
+    public function add_header_action(string $html) : void {
+        $this->_headeractions[] = $html;
+    }
+
+    /**
+     * Get the list of HTML for actions to render in the header actions menu.
+     *
+     * @return string[]
+     */
+    public function get_header_actions() : array {
+        return $this->_headeractions;
+    }
+
+    /**
+     * Set the flag to indicate if the region main settings should be rendered as an action
+     * in the header actions menu rather than at the top of the content.
+     *
+     * @param bool $value If the settings should be in the header.
+     */
+    public function set_include_region_main_settings_in_header_actions(bool $value) : void {
+        $this->_regionmainsettingsinheader = $value;
+    }
+
+    /**
+     * Check if the  region main settings should be rendered as an action in the header actions
+     * menu rather than at the top of the content.
+     *
+     * @return bool
+     */
+    public function include_region_main_settings_in_header_actions() : bool {
+        return $this->_regionmainsettingsinheader;
+    }
+
+    /**
+     * Set the flag to indicate if the secondary navigation should be rendered.
+     *
+     * @param bool $hassecondarynavigation If the secondary navigation should be rendered.
+     * @param bool $istablist When true, the navigation bar should be rendered and behave with a tablist ARIA role.
+     *                        If false, it's rendered with a menubar ARIA role. Defaults to false.
+     */
+    public function set_secondary_navigation(bool $hassecondarynavigation, bool $istablist = false): void {
+        $this->_hassecondarynavigation = $hassecondarynavigation;
+        $this->_hastablistsecondarynavigation = $istablist;
+    }
+
+    /**
+     * Check if the secondary navigation should be rendered.
+     *
+     * @return bool
+     */
+    public function has_secondary_navigation(): bool {
+        return $this->_hassecondarynavigation;
+    }
+
+    /**
+     * Check if the secondary navigation should be rendered with a tablist as opposed to a menubar.
+     *
+     * @return bool
+     */
+    public function has_tablist_secondary_navigation(): bool {
+        return $this->_hastablistsecondarynavigation;
+    }
+
+    /**
+     * Set the key of the secondary nav node to be activated.
+     *
+     * @param string $navkey the key of the secondary nav node to be activated.
+     */
+    public function set_secondary_active_tab(string $navkey) : void {
+        $this->_activekeysecondary = $navkey;
+    }
+
+    /**
+     * The key of secondary nav node to activate.
+     *
+     * @return string|null get the key of the secondary node to activate.
+     */
+    public function get_secondary_active_tab(): ?string {
+        return $this->_activekeysecondary;
+    }
+
+    /**
+     * Set the key of the primary nav node to be activated.
+     *
+     * @param string $navkey
+     */
+    public function set_primary_active_tab(string $navkey): void {
+        $this->_activenodeprimary = $navkey;
+    }
+
+    /**
+     * The key of the primary nav node to activate.
+     *
+     * @return string|null get the key of the primary nav node to activate.
+     */
+    public function get_primary_activate_tab(): ?string {
+        return $this->_activenodeprimary;
+    }
+
+    /**
+     * Sets the navigation overflow state. This allows developers to turn off the overflow menu if they perhaps are using
+     * some other navigation to show settings.
+     *
+     * @param bool  $state  The state of whether to show the navigation overflow.
+     */
+    public function set_navigation_overflow_state(bool $state): void {
+        $this->_navigationoverflow = $state;
+    }
+
+    /**
+     * Gets the navigation overflow state.
+     *
+     * @return bool The navigation overflow state.
+     */
+    public function get_navigation_overflow_state(): bool {
+        return $this->_navigationoverflow;
     }
 }
