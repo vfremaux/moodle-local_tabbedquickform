@@ -1,18 +1,16 @@
-/*
-// Let standard nav-link and nav-tab operate.
-.quickform-tab {
-    float: left;
-    padding: 5px 10px;
+
+/* layout in modedit */
+.quickform.tabtree {
+    display: flex;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
 }
 
-.quickform-tab.active.here {
-    border-top: 1px solid #888;
-    border-left: 1px solid #888;
-    border-right: 1px solid #888;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+.quickform.tabtree .tabrow0 {
+    display: flex;
+    margin-top: 0;
+    margin-bottom: 0;
 }
-*/
 
 .quickform.moremenu {
     height: initial;
@@ -24,8 +22,11 @@
 
 .moremenu .quickform-tab.active  .nav-link:focus, .moremenu .quickform-tab.active .nav-link:hover,
 .moremenu .quickform-tab.here .nav-link {
+    /* TODO : default to boost theme */
+    /*
     background-color: #f8f9fa;
     border-bottom-color: #AF28CC;
+    */
 }
 
 .moremenu .quickform-tab .nav-link:focus {
@@ -33,7 +34,10 @@
 }
 
 .moremenu .quickform-tab.here .nav-link {
+    /* TODO : default to boost theme */
+    /*
     border-bottom-color: #AF28CC;
+    */
 }
 
 .quickform-hidden-tab {
@@ -43,11 +47,6 @@
 
 .quickform-tab a span {
     white-space: nowrap;
-}
-
-
-.nav.nav-tabs a[aria-haspopup=true] {
-   display: none;
 }
 
 .configure-actions {

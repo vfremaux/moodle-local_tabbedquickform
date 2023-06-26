@@ -80,7 +80,7 @@ class MoodleQuickForm_Tabbed_Renderer extends HTML_QuickForm_Renderer_Tableless 
      *
      * @var string
      */
-    var $_configureButtonsTemplate = "\n\t<div class=\"configure-actions\"><a href=\"{link}\" class=\"formconfigure\"><input type=\"button\" class=\"{classes}\" value=\"{formconfigurelabel}\" /></a></div>";
+    var $_configureButtonsTemplate = "\n\t<div class=\"configure-actions\"><a href=\"{link}\" class=\"formconfigure\"><input type=\"button\" class=\"btn {classes}\" value=\"{formconfigurelabel}\" /></a></div>";
 
     /**
      * Array whose keys are element names. If the key exists this is a advanced element
