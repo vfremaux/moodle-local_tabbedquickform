@@ -125,6 +125,11 @@ class moodle_page {
     const STATE_DONE = 3;
 
     /**
+     * The separator used for separating page title elements.
+     */
+    const TITLE_SEPARATOR = ' | ';
+
+    /**
      * @var int The current state of the page. The state a page is within
      * determines what actions are possible for it.
      */
@@ -867,13 +872,22 @@ class moodle_page {
 
     /**
      * Returns the secondary navigation object
+     *
+     * @todo MDL-74939 Remove support for old 'local\views\secondary' class location
      * @return secondary
      */
     protected function magic_get_secondarynav() {
         if ($this->_secondarynav === null) {
             $class = 'core\navigation\views\secondary';
             // Try and load a custom class first.
-            if (class_exists("mod_{$this->activityname}\\local\\views\\secondary")) {
+            if (class_exists("mod_{$this->activityname}\\navigation\\views\\secondary")) {
+                $class = "mod_{$this->activityname}\\navigation\\views\\secondary";
+            } else if (class_exists("mod_{$this->activityname}\\local\\views\\secondary")) {
+                // For backwards compatibility, support the old location for this class (it was in a
+                // 'local' namespace which shouldn't be used for core APIs).
+                debugging("The class mod_{$this->activityname}}\\local\\views\\secondary uses a deprecated " .
+                        "namespace. Please move it to mod_{$this->activityname}\\navigation\\views\\secondary.",
+                        DEBUG_DEVELOPER);
                 $class = "mod_{$this->activityname}\\local\\views\\secondary";
             }
 
@@ -1289,7 +1303,7 @@ class moodle_page {
      * in the standard theme.
      *
      * For an idea of the common page layouts see
-     * {@link http://docs.moodle.org/dev/Themes_2.0#The_different_layouts_as_of_August_17th.2C_2010}
+     * {@link https://docs.moodle.org/dev/Themes_overview#Layouts}
      * But please keep in mind that it may be (and normally is) out of date.
      * The only place to find an accurate up-to-date list of the page layouts
      * available for your version of Moodle is {@link theme/base/config.php}
@@ -1358,14 +1372,47 @@ class moodle_page {
 
     /**
      * Sets the title for the page.
+     *
      * This is normally used within the title tag in the head of the page.
      *
+     * Some tips for providing a meaningful page title:
+     * - The page title must be accurate and informative.
+     * - If the page causes a change of context (e.g. a search functionality), it should describe the result or change of context
+     *   to the user.
+     * - It should be concise.
+     * - If possible, it should uniquely identify the page.
+     * - The most identifying information should come first. (e.g. Submit assignment | Assignment | Moodle)
+     *
+     * For more information, see
+     * {@link https://www.w3.org/WAI/WCAG21/Understanding/page-titled Understanding Success Criterion 2.4.2: Page Titled}
+     *
      * @param string $title the title that should go in the <head> section of the HTML of this page.
+     * @param bool $appendsitename Appends site name at the end of the given title. It is encouraged to append the site name as this
+     *                              especially helps with accessibility. If it's necessary to override this, please keep in mind
+     *                              to ensure that the title provides a concise summary of the page being displayed.
      */
-    public function set_title($title) {
+    public function set_title($title, bool $appendsitename = true) {
+        global $CFG;
+
         $title = format_string($title);
         $title = strip_tags($title);
         $title = str_replace('"', '&quot;', $title);
+
+        if ($appendsitename) {
+            // Append the site name at the end of the page title.
+            $sitenamedisplay = 'shortname';
+            if (!empty($CFG->sitenameintitle)) {
+                $sitenamedisplay = $CFG->sitenameintitle;
+            }
+            $site = get_site();
+            if (empty(trim($site->{$sitenamedisplay} ?? ''))) {
+                // If for some reason the site name is not yet set, fall back to 'Moodle'.
+                $title .= self::TITLE_SEPARATOR . 'Moodle';
+            } else {
+                $title .= self::TITLE_SEPARATOR . format_string($site->{$sitenamedisplay});
+            }
+        }
+
         $this->_title = $title;
     }
 
@@ -1655,11 +1702,7 @@ class moodle_page {
                     '/settings.php?section=maintenancemode">' . get_string('maintenancemode', 'admin') .
                     '</a> ' . $this->button);
 
-            $title = $this->title;
-            if ($title) {
-                $title .= ' - ';
-            }
-            $this->set_title($title . get_string('maintenancemode', 'admin'));
+            $this->set_title(get_string('maintenancemode', 'admin'));
         }
 
         $this->initialise_standard_body_classes();
@@ -1788,7 +1831,7 @@ class moodle_page {
                 break;
 
                 case 'category':
-                    if (!empty($CFG->allowcategorythemes) && !$hascustomdevicetheme) {
+                    if (!empty($CFG->allowcategorythemes) && !empty($this->_course) && !$hascustomdevicetheme) {
                         $categories = $this->categories;
                         foreach ($categories as $category) {
                             if (!empty($category->theme)) {
@@ -1864,7 +1907,7 @@ class moodle_page {
         }
 
         if (is_null($script)) {
-            $script = ltrim($SCRIPT, '/');
+            $script = ltrim($SCRIPT ?? '', '/');
             $len = strlen($CFG->admin);
             if (substr($script, 0, $len) == $CFG->admin) {
                 $script = 'admin' . substr($script, $len);
@@ -1928,9 +1971,10 @@ class moodle_page {
 
         if (!empty($this->_cm)) {
             $this->add_body_class('cmid-' . $this->_cm->id);
+            $this->add_body_class('cm-type-' . $this->_cm->modname);
         }
 
-        if (!empty($CFG->allowcategorythemes)) {
+        if (!empty($CFG->allowcategorythemes) && !empty($this->_course)) {
             $this->ensure_category_loaded();
             foreach ($this->_categories as $catid => $notused) {
                 $this->add_body_class('category-' . $catid);

@@ -141,11 +141,12 @@ function local_tabbedquickform_hook() {
         }
 
         $excluded = false;
+        // TODO : $PAGE not there ath the moment the hook is called in in 4.1 ? 
         foreach ($exclusions as $exc) {
             if (!empty($exc)) {
                 $exc = str_replace('*', '.*', trim($exc));
                 $exc = str_replace('?', '.', $exc);
-                $excluded = $excluded || preg_match("/{$exc}/", $PAGE->bodyid);
+                $excluded = $excluded || preg_match("/{$exc}/", @$PAGE->bodyid);
             }
         }
 
