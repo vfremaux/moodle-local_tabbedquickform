@@ -77,7 +77,12 @@ function form_init_date_js() {
     global $PAGE;
     static $done = false;
     if (!$done) {
+        $done = true;
         $calendar = \core_calendar\type_factory::get_calendar_instance();
+        if ($calendar->get_name() !== 'gregorian') {
+            // The YUI2 calendar only supports the gregorian calendar type.
+            return;
+        }
         $module   = 'moodle-form-dateselector';
         $function = 'M.form.dateselector.init_date_selectors';
         $defaulttimezone = date_default_timezone_get();
@@ -105,7 +110,6 @@ function form_init_date_js() {
             'december'          => date_format_string(strtotime("December 1"), '%B', $defaulttimezone)
         ));
         $PAGE->requires->yui_module($module, $function, $config);
-        $done = true;
     }
 }
 
@@ -165,6 +169,10 @@ abstract class moodleform {
      * @param mixed $attributes you can pass a string of html attributes here or an array.
      *               Special attribute 'data-random-ids' will randomise generated elements ids. This
      *               is necessary when there are several forms on the same page.
+     *               Special attribute 'data-double-submit-protection' set to 'off' will turn off
+     *               double-submit protection JavaScript - this may be necessary if your form sends
+     *               downloadable files in response to a submit button, and can't call
+     *               \core_form\util::form_download_complete();
      * @param bool $editable
      * @param array $ajaxformdata Forms submitted via ajax, must pass their data here, instead of relying on _GET and _POST.
      */
@@ -304,7 +312,7 @@ abstract class moodleform {
         // the _qf__.$this->_formname serves as a marker that form was actually submitted
         if (array_key_exists('_qf__'.$this->_formname, $submission) and $submission['_qf__'.$this->_formname] == 1) {
             if (!confirm_sesskey()) {
-                print_error('invalidsesskey');
+                throw new \moodle_exception('invalidsesskey');
             }
             $files = $_FILES;
         } else {
@@ -512,19 +520,57 @@ abstract class moodleform {
     }
 
     /**
+     * Returns an element of multi-dimensional array given the list of keys
+     *
+     * Example:
+     * $array['a']['b']['c'] = 13;
+     * $v = $this->get_array_value_by_keys($array, ['a', 'b', 'c']);
+     *
+     * Will result it $v==13
+     *
+     * @param array $array
+     * @param array $keys
+     * @return mixed returns null if keys not present
+     */
+    protected function get_array_value_by_keys(array $array, array $keys) {
+        $value = $array;
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $value)) {
+                $value = $value[$key];
+            } else {
+                return null;
+            }
+        }
+        return $value;
+    }
+
+    /**
      * Checks if a parameter was passed in the previous form submission
      *
-     * @param string $name the name of the page parameter we want
+     * @param string $name the name of the page parameter we want, for example 'id' or 'element[sub][13]'
      * @param mixed  $default the default value to return if nothing is found
      * @param string $type expected type of parameter
      * @return mixed
      */
     public function optional_param($name, $default, $type) {
-        if (isset($this->_ajaxformdata[$name])) {
-            return clean_param($this->_ajaxformdata[$name], $type);
-        } else {
-            return optional_param($name, $default, $type);
+        $nameparsed = [];
+        // Convert element name into a sequence of keys, for example 'element[sub][13]' -> ['element', 'sub', '13'].
+        parse_str($name . '=1', $nameparsed);
+        $keys = [];
+        while (is_array($nameparsed)) {
+            $key = key($nameparsed);
+            $keys[] = $key;
+            $nameparsed = $nameparsed[$key];
         }
+
+        // Search for the element first in $this->_ajaxformdata, then in $_POST and then in $_GET.
+        if (($value = $this->get_array_value_by_keys($this->_ajaxformdata ?? [], $keys)) !== null ||
+            ($value = $this->get_array_value_by_keys($_POST, $keys)) !== null ||
+            ($value = $this->get_array_value_by_keys($_GET, $keys)) !== null) {
+            return $type == PARAM_RAW ? $value : clean_param($value, $type);
+        }
+
+        return $default;
     }
 
     /**
@@ -1091,17 +1137,21 @@ abstract class moodleform {
      * @param int $addfieldsno how many fields to add at a time
      * @param string $addstring name of button, {no} is replaced by no of blanks that will be added.
      * @param bool $addbuttoninside if true, don't call closeHeaderBefore($addfieldsname). Default false.
+     * @param string $deletebuttonname if specified, treats the no-submit button with this name as a "delete element" button
+     *         in each of the elements
      * @return int no of repeats of element in this page
      */
-    function repeat_elements($elementobjs, $repeats, $options, $repeathiddenname,
-            $addfieldsname, $addfieldsno=5, $addstring=null, $addbuttoninside=false){
-        if ($addstring===null){
+    public function repeat_elements($elementobjs, $repeats, $options, $repeathiddenname,
+                                    $addfieldsname, $addfieldsno = 5, $addstring = null, $addbuttoninside = false,
+                                    $deletebuttonname = '') {
+        if ($addstring === null) {
             $addstring = get_string('addfields', 'form', $addfieldsno);
         } else {
             $addstring = str_ireplace('{no}', $addfieldsno, $addstring);
         }
         $repeats = $this->optional_param($repeathiddenname, $repeats, PARAM_INT);
         $addfields = $this->optional_param($addfieldsname, '', PARAM_TEXT);
+        $oldrepeats = $repeats;
         if (!empty($addfields)){
             $repeats += $addfieldsno;
         }
@@ -1112,7 +1162,18 @@ abstract class moodleform {
         //value not to be overridden by submitted value
         $mform->setConstants(array($repeathiddenname=>$repeats));
         $namecloned = array();
+        $no = 1;
         for ($i = 0; $i < $repeats; $i++) {
+            if ($deletebuttonname) {
+                $mform->registerNoSubmitButton($deletebuttonname . "[$i]");
+                $isdeleted = $this->optional_param($deletebuttonname . "[$i]", false, PARAM_RAW) ||
+                    $this->optional_param($deletebuttonname . "-hidden[$i]", false, PARAM_RAW);
+                if ($isdeleted) {
+                    $mform->addElement('hidden', $deletebuttonname . "-hidden[$i]", 1);
+                    $mform->setType($deletebuttonname . "-hidden[$i]", PARAM_INT);
+                    continue;
+                }
+            }
             foreach ($elementobjs as $elementobj){
                 $elementclone = fullclone($elementobj);
                 $this->repeat_elements_fix_clone($i, $elementclone, $namecloned);
@@ -1121,10 +1182,22 @@ abstract class moodleform {
                     foreach ($elementclone->getElements() as $el) {
                         $this->repeat_elements_fix_clone($i, $el, $namecloned);
                     }
-                    $elementclone->setLabel(str_replace('{no}', $i + 1, $elementclone->getLabel()));
+                    $elementclone->setLabel(str_replace('{no}', $no, $elementclone->getLabel()));
+                } else if ($elementobj instanceof \HTML_QuickForm_submit && $elementobj->getName() == $deletebuttonname) {
+                    // Mark the "Delete" button as no-submit.
+                    $onclick = $elementclone->getAttribute('onclick');
+                    $skip = 'skipClientValidation = true;';
+                    $onclick = ($onclick !== null) ? $skip . ' ' . $onclick : $skip;
+                    $elementclone->updateAttributes(['data-skip-validation' => 1, 'data-no-submit' => 1, 'onclick' => $onclick]);
+                }
+
+                // Mark newly created elements, so they know not to look for any submitted data.
+                if ($i >= $oldrepeats) {
+                    $mform->note_new_repeat($elementclone->getName());
                 }
 
                 $mform->addElement($elementclone);
+                $no++;
             }
         }
         for ($i=0; $i<$repeats; $i++) {
@@ -1147,24 +1220,22 @@ abstract class moodleform {
                             call_user_func_array(array(&$mform, 'addHelpButton'), $params);
                             break;
                         case 'disabledif' :
-                            foreach ($namecloned as $num => $name){
-                                if ($params[0] == $name){
-                                    $params[0] = $params[0]."[$i]";
-                                    break;
-                                }
-                            }
-                            $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'disabledIf'), $params);
-                            break;
                         case 'hideif' :
+                            $pos = strpos($params[0], '[');
+                            $ending = '';
+                            if ($pos !== false) {
+                                $ending = substr($params[0], $pos);
+                                $params[0] = substr($params[0], 0, $pos);
+                            }
                             foreach ($namecloned as $num => $name){
                                 if ($params[0] == $name){
-                                    $params[0] = $params[0]."[$i]";
+                                    $params[0] = $params[0] . "[$i]" . $ending;
                                     break;
                                 }
                             }
                             $params = array_merge(array($realelementname), $params);
-                            call_user_func_array(array(&$mform, 'hideIf'), $params);
+                            $function = ($option === 'disabledif') ? 'disabledIf' : 'hideIf';
+                            call_user_func_array(array(&$mform, $function), $params);
                             break;
                         case 'rule' :
                             if (is_string($params)){
@@ -1189,7 +1260,7 @@ abstract class moodleform {
                 }
             }
         }
-        $mform->addElement('submit', $addfieldsname, $addstring);
+        $mform->addElement('submit', $addfieldsname, $addstring, [], false);
 
         if (!$addbuttoninside) {
             $mform->closeHeaderBefore($addfieldsname);
@@ -1419,6 +1490,40 @@ abstract class moodleform {
     }
 
     /**
+     * Used by tests to simulate submitted form data submission via AJAX.
+     *
+     * For form fields where no data is submitted the default for that field as set by set_data or setDefault will be passed to
+     * get_data.
+     *
+     * This method sets $_POST or $_GET and $_FILES with the data supplied. Our unit test code empties all these
+     * global arrays after each test.
+     *
+     * @param array  $simulatedsubmitteddata       An associative array of form values (same format as $_POST).
+     * @param array  $simulatedsubmittedfiles      An associative array of files uploaded (same format as $_FILES). Can be omitted.
+     * @param string $method                       'post' or 'get', defaults to 'post'.
+     * @param null   $formidentifier               the default is to use the class name for this class but you may need to provide
+     *                                              a different value here for some forms that are used more than once on the
+     *                                              same page.
+     * @return array array to pass to form constructor as $ajaxdata
+     */
+    public static function mock_ajax_submit($simulatedsubmitteddata, $simulatedsubmittedfiles = array(), $method = 'post',
+                                            $formidentifier = null) {
+        $_FILES = $simulatedsubmittedfiles;
+        if ($formidentifier === null) {
+            $formidentifier = get_called_class();
+            $formidentifier = str_replace('\\', '_', $formidentifier); // See MDL-56233 for more information.
+        }
+        $simulatedsubmitteddata['_qf__'.$formidentifier] = 1;
+        $simulatedsubmitteddata['sesskey'] = sesskey();
+        if (strtolower($method) === 'get') {
+            $_GET = ['sesskey' => sesskey()];
+        } else {
+            $_POST = ['sesskey' => sesskey()];
+        }
+        return $simulatedsubmitteddata;
+    }
+
+    /**
      * Used by tests to generate valid submit keys for moodle forms that are
      * submitted with ajax data.
      *
@@ -1510,7 +1615,7 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
      */
     var $_disableShortforms = false;
 
-    /** @var bool whether to automatically initialise M.formchangechecker for this form. */
+    /** @var bool whether to automatically initialise the form change detector this form. */
     protected $_use_form_change_checker = true;
 
     /**
@@ -1533,6 +1638,9 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
      * @var string
      */
     var $_pageparams = '';
+
+    /** @var array names of new repeating elements that should not expect to find submitted data */
+    protected $_newrepeats = array();
 
     /** @var array $_ajaxformdata submitted form data when using mforms with ajax */
     protected $_ajaxformdata;
@@ -2142,11 +2250,13 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
             // iterate over all elements, calling their exportValue() methods
             foreach (array_keys($this->_elements) as $key) {
                 if ($this->_elements[$key]->isFrozen() && !$this->_elements[$key]->_persistantFreeze) {
-                    $varname = $this->_elements[$key]->_attributes['name'];
                     $value = '';
-                    // If we have a default value then export it.
-                    if (isset($this->_defaultValues[$varname])) {
-                        $value = $this->prepare_fixed_value($varname, $this->_defaultValues[$varname]);
+                    if (isset($this->_elements[$key]->_attributes['name'])) {
+                        $varname = $this->_elements[$key]->_attributes['name'];
+                        // If we have a default value then export it.
+                        if (isset($this->_defaultValues[$varname])) {
+                            $value = $this->prepare_fixed_value($varname, $this->_defaultValues[$varname]);
+                        }
                     }
                 } else {
                     $value = $this->_elements[$key]->exportValue($this->_submitValues, true);
@@ -2163,7 +2273,7 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
             }
             foreach ($elementList as $elementName) {
                 $value = $this->exportValue($elementName);
-                if (@PEAR::isError($value)) {
+                if ((new PEAR())->isError($value)) {
                     return $value;
                 }
                 //oh, stock QuickFOrm was returning array of arrays!
@@ -2355,12 +2465,17 @@ class MoodleQuickForm extends HTML_QuickForm_DHTMLRulesTableless {
 
         $js = '
 
-require(["core/event", "jquery"], function(Event, $) {
+require([
+    "core_form/events",
+    "jquery",
+], function(
+    FormEvents,
+    $
+) {
 
     function qf_errorHandler(element, _qfMsg, escapedName) {
-        var event = $.Event(Event.Events.FORM_FIELD_VALIDATION);
-        $(element).trigger(event, _qfMsg);
-        if (event.isDefaultPrevented()) {
+        const event = FormEvents.notifyFieldValidationFailure(element, _qfMsg);
+        if (event.defaultPrevented) {
             return _qfMsg == \'\';
         } else {
             // Legacy mforms.
@@ -2471,16 +2586,16 @@ require(["core/event", "jquery"], function(Event, $) {
                 }
             }
             // This handles both randomised (MDL-65217) and non-randomised IDs.
-            $errorid = preg_replace('/^id_/', 'id_error_', $this->_attributes['id']);
+            $errorid = preg_replace('/^id_/', 'id_error_', $elem->_attributes['id']);
             $validateJS .= '
       ret = validate_' . $this->_formName . '_' . $escapedElementName.'(frm.elements[\''.$elementName.'\'], \''.$escapedElementName.'\') && ret;
       if (!ret && !first_focus) {
         first_focus = true;
-        Y.use(\'moodle-core-event\', function() {
-            Y.Global.fire(M.core.globalEvents.FORM_ERROR, {formid: \'' . $this->_attributes['id'] . '\',
-                                                           elementid: \'' . $errorid. '\'});
-            document.getElementById(\'' . $errorid . '\').focus();
-        });
+        const element = document.getElementById("' . $errorid . '");
+        if (element) {
+          FormEvents.notifyFormError(element);
+          element.focus();
+        }
       }
 ';
 
@@ -2508,12 +2623,12 @@ require(["core/event", "jquery"], function(Event, $) {
       return ret;
     }
 
-    var form = $(document.getElementById(\'' . $this->_attributes['id'] . '\')).closest(\'form\');
-    form.on(M.core.event.FORM_SUBMIT_AJAX, function() {
+    var form = document.getElementById(\'' . $this->_attributes['id'] . '\').closest(\'form\');
+    form.addEventListener(FormEvents.eventTypes.formSubmittedByJavascript, () => {
         try {
             var myValidator = validate_' . $this->_formName . ';
         } catch(e) {
-            return true;
+            return;
         }
         if (myValidator) {
             myValidator();
@@ -2859,6 +2974,28 @@ require(["core/event", "jquery"], function(Event, $) {
     {
         return parent::isSubmitted() && (!$this->isFrozen());
     }
+
+    /**
+     * Add the element name to the list of newly-created repeat elements
+     * (So that elements that interpret 'no data submitted' as a valid state
+     * can tell when they should get the default value instead).
+     *
+     * @param string $name the name of the new element
+     */
+    public function note_new_repeat($name) {
+        $this->_newrepeats[] = $name;
+    }
+
+    /**
+     * Check if the element with the given name has just been added by clicking
+     * on the 'Add repeating elements' button.
+     *
+     * @param string $name the name of the element being checked
+     * @return bool true if the element is newly added
+     */
+    public function is_new_repeat($name) {
+        return in_array($name, $this->_newrepeats);
+    }
 }
 
 /**
@@ -2884,10 +3021,6 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
      * @var string
      */
     var $_openHiddenFieldsetTemplate = "\n\t<fieldset class=\"hidden\"><div>";
-
-    /** @var string Header Template string */
-    var $_headerTemplate =
-       "\n\t\t<legend class=\"ftoggler\">{header}</legend>\n\t\t<div class=\"fcontainer clearfix\">\n\t\t";
 
     /** @var string Template used when opening a fieldset */
     var $_openFieldsetTemplate = "\n\t<fieldset class=\"{classes}\" {id}>";
@@ -2985,7 +3118,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
      * @param MoodleQuickForm $form reference of the form
      */
     function startForm(&$form){
-        global $PAGE;
+        global $PAGE, $OUTPUT;
         $this->_reqHTML = $form->getReqHTML();
         $this->_elementTemplates = str_replace('{req}', $this->_reqHTML, $this->_elementTemplates);
         $this->_advancedHTML = $form->getAdvancedHTML();
@@ -3000,20 +3133,14 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         }
 
         if ($form->is_form_change_checker_enabled()) {
-            $PAGE->requires->yui_module('moodle-core-formchangechecker',
-                    'M.core_formchangechecker.init',
-                    array(array(
-                        'formid' => $formid,
-                        'initialdirtystate' => $form->is_dirty(),
-                    ))
-            );
-            $PAGE->requires->string_for_js('changesmadereallygoaway', 'moodle');
+            $PAGE->requires->js_call_amd('core_form/changechecker', 'watchFormById', [$formid]);
+            if ($form->is_dirty()) {
+                $PAGE->requires->js_call_amd('core_form/changechecker', 'markFormAsDirtyById', [$formid]);
+            }
         }
         if (!empty($this->_collapsibleElements)) {
             if (count($this->_collapsibleElements) > 1) {
-                $this->_collapseButtons = $this->_collapseButtonsTemplate;
-                $this->_collapseButtons = str_replace('{strexpandall}', get_string('expandall'), $this->_collapseButtons);
-                $PAGE->requires->strings_for_js(array('collapseall', 'expandall'), 'moodle');
+                $this->_collapseButtons = $OUTPUT->render_from_template('core_form/collapsesections', (object)[]);
             }
             $PAGE->requires->yui_module('moodle-form-shortforms', 'M.form.shortforms', array(array('formid' => $formid)));
         }
@@ -3068,7 +3195,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
             $html = str_replace('{groupname}', 'data-groupname="'.$group->getName().'"', $html);
             $html = str_replace('{typeclass}', 'fgroup', $html);
             $html = str_replace('{type}', 'group', $html);
-            $html = str_replace('{class}', $group->getAttribute('class'), $html);
+            $html = str_replace('{class}', $group->getAttribute('class') ?? '', $html);
             $emptylabel = '';
             if ($group->getLabel() == '') {
                 $emptylabel = 'femptylabel';
@@ -3134,7 +3261,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
             $html = str_replace('{type}', $element->getType(), $html);
             $html = str_replace('{name}', $element->getName(), $html);
             $html = str_replace('{groupname}', '', $html);
-            $html = str_replace('{class}', $element->getAttribute('class'), $html);
+            $html = str_replace('{class}', $element->getAttribute('class') ?? '', $html);
             $emptylabel = '';
             if ($element->getLabel() == '') {
                 $emptylabel = 'femptylabel';
@@ -3195,18 +3322,29 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
     * @global moodle_page $PAGE
     */
     function renderHeader(&$header) {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $header->_generateId();
         $name = $header->getName();
 
+        $collapsed = $collapseable = '';
+        if (isset($this->_collapsibleElements[$header->getName()])) {
+            $collapseable = true;
+            $collapsed = $this->_collapsibleElements[$header->getName()];
+        }
+
         $id = empty($name) ? '' : ' id="' . $header->getAttribute('id') . '"';
-        if (is_null($header->_text)) {
-            $header_html = '';
-        } elseif (!empty($name) && isset($this->_templates[$name])) {
-            $header_html = str_replace('{header}', $header->toHtml(), $this->_templates[$name]);
+        if (!empty($name) && isset($this->_templates[$name])) {
+            $headerhtml = str_replace('{header}', $header->toHtml(), $this->_templates[$name]);
         } else {
-            $header_html = str_replace('{header}', $header->toHtml(), $this->_headerTemplate);
+            $headerhtml = $OUTPUT->render_from_template('core_form/element-header',
+                (object)[
+                    'header' => $header->toHtml(),
+                    'id' => $header->getAttribute('id'),
+                    'collapseable' => $collapseable,
+                    'collapsed' => $collapsed,
+                    'helpbutton' => $header->getHelpButton(),
+                ]);
         }
 
         if ($this->_fieldsetsOpen > 0) {
@@ -3231,7 +3369,7 @@ class MoodleQuickForm_Renderer extends HTML_QuickForm_Renderer_Tableless{
         $openFieldsetTemplate = str_replace('{id}', $id, $this->_openFieldsetTemplate);
         $openFieldsetTemplate = str_replace('{classes}', join(' ', $fieldsetclasses), $openFieldsetTemplate);
 
-        $this->_html .= $openFieldsetTemplate . $header_html;
+        $this->_html .= $openFieldsetTemplate . $headerhtml;
         $this->_fieldsetsOpen++;
     }
 
@@ -3334,7 +3472,6 @@ MoodleQuickForm::registerElementType('grading', "$CFG->libdir/form/grading.php",
 MoodleQuickForm::registerElementType('group', "$CFG->libdir/form/group.php", 'MoodleQuickForm_group');
 MoodleQuickForm::registerElementType('header', "$CFG->libdir/form/header.php", 'MoodleQuickForm_header');
 MoodleQuickForm::registerElementType('hidden', "$CFG->libdir/form/hidden.php", 'MoodleQuickForm_hidden');
-MoodleQuickForm::registerElementType('htmleditor', "$CFG->libdir/form/htmleditor.php", 'MoodleQuickForm_htmleditor');
 MoodleQuickForm::registerElementType('listing', "$CFG->libdir/form/listing.php", 'MoodleQuickForm_listing');
 MoodleQuickForm::registerElementType('defaultcustom', "$CFG->libdir/form/defaultcustom.php", 'MoodleQuickForm_defaultcustom');
 MoodleQuickForm::registerElementType('modgrade', "$CFG->libdir/form/modgrade.php", 'MoodleQuickForm_modgrade');

@@ -15,28 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem.
+ * Version details.
  *
- * @package     local_shop
- * @author      Valery Fremaux (valery.fremaux@gmail.com)
- * @copyright   2017 Valery Fremaux <valery.fremaux@gmail.com> (activeprolearn.com)
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     local_tabbedquickform
+ * @category    local
+ * @author      Valery Fremaux <valery.fremaux@gmail.com>
+ * @copyright   2016 onwards Valery Fremaux (http://www.mylearningfactory.com)
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_tabbedquickform\privacy;
+function local_tabbedquickform_require_js($formid) {
+    global $PAGE;
 
-/**
- * Null provider class
- */
-class provider implements \core_privacy\local\metadata\null_provider {
-
-    /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
-     *
-     * @return  string
-     */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
-    }
+    // From 3.7 version.
+    $PAGE->requires->js_call_amd('core_form/showadvanced', 'init', [$formid]);
 }

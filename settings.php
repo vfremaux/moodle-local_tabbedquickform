@@ -22,11 +22,11 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/local/tabbedquickform/locallib.php');
+require_once($CFG->dirroot.'/local/tabbedquickform/lib.php');
 
 if ($hassiteconfig) {
     // Needs this condition or there is error on login page.
-    $settings = new admin_settingpage('local_tabbedquickform', get_string('pluginname', 'local_tabbedquickform'));
+    $settings = new admin_settingpage('localsettingtabbedquickform', get_string('pluginname', 'local_tabbedquickform'));
     $ADMIN->add('localplugins', $settings);
 
     $key = 'local_tabbedquickform/enable';
@@ -57,18 +57,14 @@ if ($hassiteconfig) {
     $desc = get_string('exportprofiles_desc', 'local_tabbedquickform', $a);
     $settings->add(new admin_setting_heading('h1', $label, $desc));
 
-    if (local_tabbedquickform_supports_feature('tools/export')) {
-        $a = new StdClass;
-        $a->exporturl = $CFG->wwwroot.'/local/tabbedquickform/pro/export.php';
-        $a->importurl = $CFG->wwwroot.'/local/tabbedquickform/pro/import.php';
-        $a->reseturl = $CFG->wwwroot.'/local/tabbedquickform/reset.php';
-        $label = get_string('exportprofilespro', 'local_tabbedquickform');
-        $desc = get_string('exportprofilespro_desc', 'local_tabbedquickform', $a);
-        $settings->add(new admin_setting_heading('h1', $label, $desc));
+    if (local_tabbedquickform_supports_feature('emulate/community') == 'pro') {
+        include_once($CFG->dirroot.'/local/tabbedquickform/pro/prolib.php');
+        $promanager = local_tabbedquickform\pro_manager::instance();
+        $promanager->add_settings($ADMIN, $settings);
     } else {
         $label = get_string('plugindist', 'local_tabbedquickform');
         $desc = get_string('plugindist_desc', 'local_tabbedquickform');
         $settings->add(new admin_setting_heading('plugindisthdr', $label, $desc));
     }
-
 }
+
